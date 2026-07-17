@@ -1342,6 +1342,16 @@ git commit -m "test(e2e): cover the entry experience and the escape hatch"
 - [ ] A screen reader gets the real string, never the noise
 - [ ] Nothing clipped and no horizontal scroll at 375px
 
+## Open concern for Plan 3 — bundle size
+
+`/systems/aiva` transfers **~184 KB gzip** of JS, above the ~150 KB the plan targeted and
+the ~145 KB Plan 1 measured. Confirmed it is NOT an animation-library leak (0 signature
+hits for lenis/three/gsap) and NOT `zod` (stays server-side under RSC). The largest chunk
+carries React/Next scheduler + react-dom — it reads as Next 16.2.10 / React 19.2.4
+framework runtime, not a Plan 2 regression, but the root cause of the growth vs. the Plan 1
+baseline was not proven. Plan 3 adds Three.js and should open with a bundle-analysis pass so
+the static routes' payload is understood and held, not just assumed lean.
+
 ## Known limitations (deliberately deferred)
 
 - **The mouse wheel scrolls the background while the gate/boot is up.** `EntryOverlay` locks
