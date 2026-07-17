@@ -28,6 +28,29 @@ describe('EntryOverlay', () => {
     expect(await screen.findByText(/OUTPUT ROUTING/i)).toBeInTheDocument()
   })
 
+  /**
+   * A modal must remove background content from focus/interaction, not merely
+   * claim `aria-modal`. Without `inert`, Tab reaches the content behind the gate
+   * before the gate's own buttons.
+   */
+  it('makes background content inert while the gate is up, and interactive again after', async () => {
+    const user = userEvent.setup()
+    const { container } = render(
+      <EntryOverlay>
+        <a href="/somewhere">BACKGROUND LINK</a>
+      </EntryOverlay>,
+    )
+    await screen.findByText(/OUTPUT ROUTING/i)
+    const wrapper = container.querySelector('a')!.parentElement!
+    expect(wrapper.hasAttribute('inert')).toBe(true)
+
+    await user.click(screen.getByRole('button', { name: /OFF/i })) // → boot, still inert
+    expect(wrapper.hasAttribute('inert')).toBe(true)
+
+    await user.click(await screen.findByRole('button', { name: /SKIP/i })) // → done
+    await waitFor(() => expect(wrapper.hasAttribute('inert')).toBe(false))
+  })
+
   it('never shows the gate to a visitor who already chose', async () => {
     localStorage.setItem(GATE_KEY, 'off')
     render(<EntryOverlay><p>x</p></EntryOverlay>)

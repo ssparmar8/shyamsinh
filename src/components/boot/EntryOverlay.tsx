@@ -66,18 +66,31 @@ export function EntryOverlay({ children }: { children: React.ReactNode }) {
 
   const onBootDone = useCallback(() => setPhase('done'), [])
 
+  const overlayUp = phase === 'gate' || phase === 'boot'
+
   useEffect(() => {
     // Lock scroll only while an overlay is actually up.
-    const locked = phase === 'gate' || phase === 'boot'
-    document.body.style.overflow = locked ? 'hidden' : ''
+    document.body.style.overflow = overlayUp ? 'hidden' : ''
     return () => {
       document.body.style.overflow = ''
     }
-  }, [phase])
+  }, [overlayUp])
 
   return (
     <>
-      {children}
+      {/*
+        `inert` while the overlay is up, not just `aria-modal` on the overlay.
+        aria-modal is a hint with no enforcement: without this, Tab reaches the six
+        record links behind the gate BEFORE the gate's own ON/OFF buttons, and a
+        screen reader reads straight through the "modal" into background content.
+        `inert` removes the whole subtree from focus, pointer, and the a11y tree in
+        one attribute — no focus-trap library — while leaving it in the DOM, so
+        crawlers and no-JS visitors still get the full page. `display: contents`
+        keeps the wrapper layout-neutral; `inert` still applies through it.
+      */}
+      <div style={{ display: 'contents' }} inert={overlayUp || undefined}>
+        {children}
+      </div>
       {phase === 'gate' && <Gate onChoose={onChoose} />}
       {phase === 'boot' && <BootSequence onDone={onBootDone} />}
     </>
