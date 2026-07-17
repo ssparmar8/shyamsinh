@@ -10,7 +10,7 @@ export const IDENTITY = {
   // constructed guesses. Each must be opened and confirmed to resolve before launch,
   // or the row dropped. A dead link in the contact section is worse than a missing one.
   links: [
-    { label: 'LINKEDIN', href: 'https://www.linkedin.com/in/shyamsinh-parmar' },
+    { label: 'LINKEDIN', href: 'https://www.linkedin.com/in/shyamsinh-parmar-7ba284167/' },
     { label: 'GITHUB', href: 'https://github.com/ssparmar8' },
     { label: 'WOYCE TECH', href: 'https://github.com/woyce-tech' },
     { label: 'UPWORK', href: 'https://www.upwork.com/freelancers/~shyamsinhparmar' },

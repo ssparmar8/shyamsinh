@@ -70,6 +70,20 @@ export const SystemSchema = z
       'Fintech',
     ]),
     region: z.enum(['US', 'CA', 'DK', 'IN']),
+    /**
+     * Who this was built for.
+     *
+     * Most of the archive is client contract work. AIVA is not — it is Shyamsinh's
+     * own product, built and operated under Woyce Tech. That distinction has to live
+     * in the data rather than in prose, because two counts depend on it:
+     * `countClientRegions()` must only consider work actually delivered to a client,
+     * and no record may carry the "freelance contract" role unless it was one.
+     *
+     * This field exists because the first draft labelled AIVA a client contract in
+     * the US. It is neither. Getting that wrong on the most prominent record is
+     * exactly the kind of error a client would catch.
+     */
+    engagement: z.enum(['Client contract', 'Own product']),
     year: z.number().int().min(CAREER_START_YEAR).max(2030),
     role: z.string().min(1),
     stack: z.array(z.string().min(1)).min(1),
@@ -85,6 +99,11 @@ export const SystemSchema = z
   .refine((s) => !(s.status === 'PRIVATE' && s.url), {
     message: 'a PRIVATE system must not carry a url',
     path: ['url'],
+  })
+  .refine((s) => !(s.engagement === 'Own product' && /contract/i.test(s.role)), {
+    message:
+      'an Own product must not claim a contract role — it was not client work',
+    path: ['role'],
   })
 
 export type System = z.infer<typeof SystemSchema>

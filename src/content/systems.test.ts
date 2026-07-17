@@ -8,6 +8,7 @@ import {
   countSectors,
   countClientRegions,
   countRegions,
+  countOwnProducts,
 } from './index'
 
 describe('SYSTEMS content', () => {
@@ -65,5 +66,29 @@ describe('SYSTEMS content', () => {
   it('counts 3 client regions and 4 map regions including home', () => {
     expect(countClientRegions()).toBe(3)
     expect(countRegions()).toBe(4)
+  })
+
+  /**
+   * AIVA is Shyamsinh's own product (Woyce Tech), not a client contract, and it
+   * ships to India. Both facts were wrong in the first draft — it was labelled a
+   * US freelance contract, on the most prominent record on the site.
+   *
+   * These two tests pin the consequences: the record must not claim contract work,
+   * and its Indian region must not leak into the client-region count, which would
+   * assert a fourth client region that doesn't exist.
+   */
+  it('AIVA is an own product in IN, not a client contract', () => {
+    const aiva = getBySlug('aiva')
+    expect(aiva?.engagement).toBe('Own product')
+    expect(aiva?.region).toBe('IN')
+    expect(aiva?.role).not.toMatch(/contract/i)
+  })
+
+  it('own products never inflate the client-region count', () => {
+    const clientRegions = new Set(
+      SYSTEMS.filter((s) => s.engagement === 'Client contract').map((s) => s.region),
+    )
+    expect(clientRegions.has('IN')).toBe(false)
+    expect(countOwnProducts()).toBe(1)
   })
 })
