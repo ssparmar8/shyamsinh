@@ -10,9 +10,22 @@ export const PRIVATE_HOSTS = ['ai-uat.medicalofficeforce.co'] as const
 /** First paid backend work. Every "years of experience" figure derives from this. */
 export const CAREER_START_YEAR = 2018
 
+/**
+ * The hostname, normalised for comparison.
+ *
+ * The trailing dot matters. `ai-uat.example.co.` is the fully-qualified form of
+ * `ai-uat.example.co` — DNS treats the trailing dot as the root label and both
+ * names resolve to the SAME server. `new URL()` preserves it verbatim, so a naive
+ * `hostname === host` check lets `https://ai-uat.example.co./login` through while
+ * still loading the client's private environment. The URL parser also decodes
+ * `%2e` into a literal dot, which lands in the same place.
+ *
+ * Stripping trailing dots closes both. `URL.hostname` already lowercases, so case
+ * variation is handled for free.
+ */
 const hostOf = (url: string): string | null => {
   try {
-    return new URL(url).hostname
+    return new URL(url).hostname.replace(/\.+$/, '')
   } catch {
     return null
   }

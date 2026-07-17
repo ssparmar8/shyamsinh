@@ -38,13 +38,42 @@ describe('SystemSchema', () => {
   })
 
   it('accepts a PRIVATE system with no url', () => {
-    const { url, ...rest } = valid
     expect(() =>
-      SystemSchema.parse({ ...rest, status: 'PRIVATE' }),
+      SystemSchema.parse({ ...valid, url: undefined, status: 'PRIVATE' }),
     ).not.toThrow()
   })
 
   it('rejects a year before the 2018 anchor', () => {
     expect(() => SystemSchema.parse({ ...valid, year: 2017 })).toThrow()
+  })
+
+  // --- Guard boundary. A trailing dot is the FQDN root label: the browser
+  // resolves `host.` and `host` to the SAME server, so without normalisation
+  // one keystroke defeats the guard entirely. `%2e` is the encoded form and
+  // the URL parser decodes it into the same trailing dot.
+  it('rejects a private host disguised with a trailing dot', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: `https://${PRIVATE_HOSTS[0]}./login` }),
+    ).toThrow(/private/i)
+  })
+
+  it('rejects a private host disguised with a percent-encoded dot', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: `https://${PRIVATE_HOSTS[0]}%2e/login` }),
+    ).toThrow(/private/i)
+  })
+
+  // The guard must be precise in BOTH directions — over-blocking would silently
+  // drop legitimate client links, which is its own kind of failure.
+  it('does not reject the legitimate apex domain', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: 'https://medicalofficeforce.co/' }),
+    ).not.toThrow()
+  })
+
+  it('does not reject a different host that merely contains the private host', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: 'https://ai-uat.medicalofficeforce.co.attacker.io/' }),
+    ).not.toThrow()
   })
 })
