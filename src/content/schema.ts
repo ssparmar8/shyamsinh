@@ -49,6 +49,26 @@ export const SystemSchema = z
     slug: z.string().regex(/^[a-z0-9-]+$/, 'slug must be lowercase, url-safe'),
     name: z.string().min(1),
     domain: z.string().min(1),
+    /**
+     * The broad vertical, from a fixed list — deliberately coarse.
+     *
+     * `domain` is the specific descriptor shown on a record ("Healthcare · EMR");
+     * `sector` is the rollup used for counting. They are different jobs: counting
+     * distinct `domain` strings returns ~one-per-project, which is not a fact about
+     * breadth, it's a fact about how many projects there are. Keep this list short —
+     * if every project gets its own sector, the count is worthless again.
+     */
+    sector: z.enum([
+      'Healthcare',
+      'Conversational AI',
+      'Compliance',
+      'Legal',
+      'Commerce',
+      'Marketing',
+      'Hiring',
+      'Enterprise',
+      'Fintech',
+    ]),
     region: z.enum(['US', 'CA', 'DK', 'IN']),
     year: z.number().int().min(CAREER_START_YEAR).max(2030),
     role: z.string().min(1),

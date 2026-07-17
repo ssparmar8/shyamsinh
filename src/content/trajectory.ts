@@ -8,10 +8,14 @@ export const TRAJECTORY = [
   { year: 2015, label: 'DIPLOMA · GTU', note: '+3 YRS', detail: 'Sanjaybhai Rajguru · CGPA 8.68' },
   { year: 2018, label: 'B.E. · GTU', note: '+3 YRS', detail: 'Marwadi · S.P.I. 6.0' },
   { year: 2018, label: 'FIRST BACKEND SYSTEM', note: '', detail: '' },
-  // detail intentionally left blank: the system/domain/region counts are derived
-  // from SYSTEMS (countSystems() / countDomains() / countRegions() in ./index),
-  // not hardcoded here — see Task 3 correction. The UI composes the final string
-  // in Task 8 so this row can never drift from the actual data.
+  // detail intentionally left blank: the counts are derived from SYSTEMS
+  // (countSystems() / countSectors() / countClientRegions() in ./index), not
+  // hardcoded here, so this row can never drift from the actual data.
+  //
+  // If this row states systems and regions together it MUST use
+  // countClientRegions() (3), never countRegions() (4). "18 SYSTEMS · 3 REGIONS"
+  // is true; "18 SYSTEMS · 4 REGIONS" is not — the 4th node is home, not a client.
+  // See the countRegions() doc comment in ./index.
   { year: 2026, label: 'AI & BACKEND ARCHITECT', note: '', detail: '' },
 ] as const
 

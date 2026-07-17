@@ -5,6 +5,7 @@ const valid = {
   slug: 'aiva',
   name: 'AIVA Chat',
   domain: 'Voice AI',
+  sector: 'Conversational AI' as const,
   region: 'US' as const,
   year: 2025,
   role: 'Architecture + led a small team',

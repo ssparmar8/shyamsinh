@@ -1,7 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import { SYSTEMS } from './systems'
 import { SystemSchema, PRIVATE_HOSTS } from './schema'
-import { getFeatured, getBySlug, getArchive } from './index'
+import {
+  getFeatured,
+  getBySlug,
+  getArchive,
+  countSectors,
+  countClientRegions,
+  countRegions,
+} from './index'
 
 describe('SYSTEMS content', () => {
   it('every system satisfies the schema', () => {
@@ -38,5 +45,21 @@ describe('SYSTEMS content', () => {
 
   it('archive excludes featured systems', () => {
     expect(getArchive().every((s) => !s.featured)).toBe(true)
+  })
+
+  it('has 9 sectors across 18 systems', () => {
+    expect(countSectors()).toBe(9)
+    expect(SYSTEMS).toHaveLength(18)
+  })
+
+  it('counts 3 client regions and 4 map regions including home', () => {
+    expect(countClientRegions()).toBe(3)
+    expect(countRegions()).toBe(4)
+  })
+
+  it('keeps sectors coarse — no sector has only one system unless it genuinely stands alone', () => {
+    // Guard against sector-per-project drift, which would make the count meaningless
+    // again. If this fires, the sector list has grown too fine-grained.
+    expect(countSectors()).toBeLessThanOrEqual(SYSTEMS.length / 2)
   })
 })
