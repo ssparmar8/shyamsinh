@@ -310,7 +310,18 @@ export type System = z.infer<typeof SystemSchema>
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `npm test -- schema`
-Expected: PASS — 10 passed.
+Expected: PASS — 12 passed.
+
+> **Two hardenings review added to the shipped code** (see `src/content/schema.ts` at HEAD;
+> reproduce from there rather than from the code block above, which predates them):
+> 1. Host matching covers **subdomains** via an `isPrivateHost` helper — `app.<private>` is
+>    still the client's environment. The leading dot in the suffix check keeps a lookalike
+>    at `<private>.evil.com` correctly allowed.
+> 2. A **literal-anchored test** (`rejects the real client UAT host, spelled out`) that
+>    hardcodes the hostname instead of reading `PRIVATE_HOSTS[0]`. Every other must-block
+>    test derives from the constant, so all of them stay green if the constant itself is
+>    mistyped — leaving the real link unguarded while the suite reports success. That was
+>    demonstrated, not theorised. Do not DRY this test against the constant.
 
 > **Note on zod 4.** The installed zod is v4, where `z.string().url()` is deprecated in
 > favour of `z.url()`. Use `z.url().optional()`. Behaviour is equivalent (verified: same
