@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { IDENTITY, yearsExperience } from '@/content/identity'
 import { getFeatured, countSystems, countSectors, countClientRegions } from '@/content'
 import { HudFrame } from '@/components/hud/HudFrame'
-import { ScrambleText } from '@/components/text/ScrambleText'
+import { ScrambleTextAnimated } from '@/components/text/ScrambleTextAnimated'
 import { EntryOverlay } from '@/components/boot/EntryOverlay'
 import { SmoothScroll } from '@/components/scroll/SmoothScroll'
 
@@ -16,9 +16,18 @@ export default function Home() {
         <HudFrame label="ARCHIVE://">
           <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-24">
             <div className={LABEL}>{'// IDENTITY'}</div>
-            <ScrambleText
+            {/*
+              The animated decode, not the static ScrambleText. This is the site's
+              signature effect and it was orphaned — built and unit-tested in Plan 2
+              but wired into nothing, so the hero rendered as plain text and e2e caught
+              it. The real name is always the accessible name (sr-only); the glyph
+              noise is an aria-hidden layer. Above the fold once the gate dismisses,
+              which is why useOnScreen's bottom-only rootMargin matters here.
+            */}
+            <ScrambleTextAnimated
               as="h1"
               text={IDENTITY.name}
+              durationMs={1100}
               className="mt-3 font-mono text-2xl tracking-[var(--tracking-wide)] text-[var(--color-ink)] md:text-4xl"
             />
             <div className={`${LABEL} mt-3`}>{IDENTITY.title.toUpperCase()}</div>
