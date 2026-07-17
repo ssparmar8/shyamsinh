@@ -15,8 +15,17 @@ import { useCallback, useState } from 'react'
  * `react-hooks/set-state-in-effect` rejects; and a ref callback fires exactly when
  * the element attaches, which is the thing we actually care about, instead of
  * inferring it from a dependency array.
+ *
+ * The default margin shrinks only the BOTTOM edge. An earlier `-10%` shrank all
+ * four, so an element already on screen at the top of the viewport — a hero name —
+ * sat above the shrunk boundary and NEVER intersected: `seen` stayed false and the
+ * decode never ran, leaving raw glyph noise where the name should be. Verified in a
+ * real browser (hero at y=24 → 1 frame, permanent noise). jsdom's IntersectionObserver
+ * stub fires regardless of position, so no unit test can see this — only a browser can.
+ * Shrinking only the bottom keeps the "reveal once comfortably in view" feel for
+ * below-fold content while letting anything already visible fire at mount.
  */
-export function useOnScreen<T extends Element>(rootMargin = '-10%') {
+export function useOnScreen<T extends Element>(rootMargin = '0px 0px -10% 0px') {
   const [seen, setSeen] = useState(false)
 
   const ref = useCallback(
