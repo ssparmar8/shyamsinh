@@ -1,4 +1,4 @@
-import type { System } from './schema'
+import { SystemSchema, type System } from './schema'
 
 const CONTRACT_ROLE = 'Architecture + led a small team · freelance contract'
 
@@ -305,3 +305,28 @@ export const SYSTEMS: System[] = [
     featured: false,
   },
 ]
+
+/**
+ * Validate at module load — NOT only in tests.
+ *
+ * This is the line that makes the private-host guard real. Vercel deploys run
+ * `next build`; they do not run `npm test`. Verified by experiment: pasting the
+ * client's UAT link into a record above and running `npm run build` compiled
+ * successfully and would have published it. Every guard in schema.ts — the
+ * trailing-dot bypass, subdomain matching, the PRIVATE-carries-no-url rule — was
+ * protecting the test suite and nothing else.
+ *
+ * Every route imports this module, so parsing here fails the build itself. The
+ * cost is one parse of 18 records at build time.
+ *
+ * Do not "optimise" this away, and do not move it into a test.
+ */
+for (const s of SYSTEMS) {
+  const parsed = SystemSchema.safeParse(s)
+  if (!parsed.success) {
+    const why = parsed.error.issues
+      .map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`)
+      .join('; ')
+    throw new Error(`Invalid system "${s.slug}" in src/content/systems.ts — ${why}`)
+  }
+}
