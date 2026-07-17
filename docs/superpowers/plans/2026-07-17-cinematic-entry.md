@@ -1321,6 +1321,16 @@ git commit -m "test(e2e): cover the entry experience and the escape hatch"
 - [ ] A screen reader gets the real string, never the noise
 - [ ] Nothing clipped and no horizontal scroll at 375px
 
+## Known limitations (deliberately deferred)
+
+- **Reduced-motion flipped true→false mid-session re-shows the gate.** A first-time visitor
+  who toggles their OS reduced-motion setting while reading the page will see the audio
+  prompt appear. Rare, and the obvious fix (guard the entry decision to run once) risks
+  regressing the common path where a normal visitor *must* see the gate after the
+  `useSyncExternalStore` hydration settle flips `reduced` from its `true` server snapshot to
+  the real `false`. Left as-is rather than risk something worse. Revisit only with a test
+  that pins both the common path and this edge.
+
 ## Then
 
 **Plan 3** — the canvas and scroll choreography: Three.js constellation with a 2D fallback and device-tiered particle budgets, GSAP pinned scroll, the telemetry map, and the full eight-beat homepage. Written once this lands.
