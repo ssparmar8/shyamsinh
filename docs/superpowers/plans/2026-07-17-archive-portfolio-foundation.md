@@ -131,7 +131,10 @@ Add to the `"scripts"` object:
 - [ ] **Step 7: Verify the test runner starts**
 
 Run: `npm test`
-Expected: exits 0 with `No test files found` — that's success at this stage.
+Expected: prints `No test files found, exiting with code 1`. Vitest 4 exits **1** here, not 0 —
+that is correct and expected at this stage, not a regression. Do **not** add
+`passWithNoTests: true` or a dummy test to force a green exit; Task 2 adds real tests and
+`npm test` goes green then. CI (Task 12) never runs against an empty suite.
 
 - [ ] **Step 8: Commit**
 
