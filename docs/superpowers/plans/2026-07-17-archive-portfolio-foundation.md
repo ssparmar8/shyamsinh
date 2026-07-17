@@ -1743,7 +1743,40 @@ test.describe('reduced motion', () => {
   test('full content renders with reduced motion', async ({ page }) => {
     await page.goto('/systems/aiva')
     await expect(page.getByRole('heading', { name: 'AIVA Chat' })).toBeVisible()
-    await expect(page.getByText(/AI voice agents/i)).toBeVisible()
+    await expect(page.getByText(/voice-AI platform/i)).toBeVisible()
+  })
+})
+
+/**
+ * The design is monospace HUD chrome. If Geist Mono doesn't load, the site still
+ * builds, still passes every unit test, and looks wrong everywhere.
+ *
+ * This happened. `@theme` (without `inline`) declared --font-mono on :root as
+ * `var(--font-geist-mono), …` while next/font defined that variable on <body> — a
+ * descendant. Invalid at computed-value time, collapsed to empty at the root,
+ * inherited down empty, no error raised. jsdom cannot see it: only a real browser
+ * computing real styles can. Hence this test.
+ */
+test.describe('typography actually loads', () => {
+  test('HUD chrome renders in Geist Mono, not a system fallback', async ({ page }) => {
+    await page.goto('/systems/aiva')
+    await page.waitForLoadState('networkidle')
+
+    const monoEl = page.locator('.font-mono, [class*="font-mono"]').first()
+    await expect(monoEl).toBeVisible()
+
+    const family = await monoEl.evaluate((el) => getComputedStyle(el).fontFamily)
+    expect(family, `font-mono resolved to "${family}" — Geist Mono did not load`).toMatch(/Geist Mono/)
+  })
+
+  test('the theme colour tokens resolve to their real values', async ({ page }) => {
+    await page.goto('/systems/aiva')
+    const dim = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--color-dim').trim(),
+    )
+    // #696969 — the AA-safe text grey. If this ever reads #8d8d8d, the contrast
+    // regression from the reference site's palette has crept back in.
+    expect(dim).toBe('#696969')
   })
 })
 ```
