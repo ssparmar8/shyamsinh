@@ -7,31 +7,50 @@ type Props = {
 }
 
 /**
- * The persistent chrome: grid, corner brackets, and a contact link that is
- * reachable at every scroll depth (spec §9.07).
+ * The persistent chrome: grid, corner brackets, and a contact link reachable at
+ * every scroll depth (spec §9.07).
+ *
+ * The chrome is `fixed`, deliberately. An earlier version positioned it `absolute`
+ * inside a `min-h-dvh` box — which is only a *floor*, so the box grows to content
+ * height and the chrome anchors to the document rather than the viewport. Measured
+ * on a 3096px page in a 964px viewport: at mid-scroll there was no chrome on screen
+ * at all, and the contact link — the whole reason this component exists — had
+ * scrolled away. It looked correct only because every route was shorter than one
+ * viewport. Plan 2's ~13,000px homepage would have exposed it immediately.
+ *
+ * Layering: grid at z-0 behind everything, content at z-10, decorative brackets at
+ * z-20 framing the viewport, interactive chrome at z-30 on top. The two decorative
+ * layers are `pointer-events-none` so they never intercept a click meant for
+ * content — a full-viewport fixed overlay that swallows clicks is the classic way
+ * this pattern goes wrong.
  */
 export function HudFrame({ children, label }: Props) {
   return (
-    <div className="hud-grid relative min-h-dvh w-full">
-      <CornerBracket corner="tl" />
-      <CornerBracket corner="tr" />
-      <CornerBracket corner="bl" />
-      <CornerBracket corner="br" />
+    <div className="relative min-h-dvh w-full">
+      <div aria-hidden="true" className="hud-grid pointer-events-none fixed inset-0 z-0" />
+
+      {/* Brackets are `absolute` within this fixed box, so they frame the viewport. */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-20">
+        <CornerBracket corner="tl" />
+        <CornerBracket corner="tr" />
+        <CornerBracket corner="bl" />
+        <CornerBracket corner="br" />
+      </div>
 
       {label && (
-        <div className="absolute top-6 left-8 font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]">
+        <div className="fixed top-6 left-8 z-30 max-w-[45vw] truncate font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]">
           {label}
         </div>
       )}
 
       <Link
         href="/contact"
-        className="absolute top-6 right-8 z-20 font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)] underline-offset-4 hover:text-[var(--color-ink)] hover:underline"
+        className="fixed top-6 right-8 z-30 font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)] underline-offset-4 hover:text-[var(--color-ink)] hover:underline"
       >
         ◂ UPLINK
       </Link>
 
-      {children}
+      <div className="relative z-10">{children}</div>
     </div>
   )
 }
