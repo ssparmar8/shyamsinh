@@ -197,14 +197,43 @@ describe('SystemSchema', () => {
   })
 
   it('accepts a PRIVATE system with no url', () => {
-    const { url, ...rest } = valid
     expect(() =>
-      SystemSchema.parse({ ...rest, status: 'PRIVATE' }),
+      SystemSchema.parse({ ...valid, url: undefined, status: 'PRIVATE' }),
     ).not.toThrow()
   })
 
   it('rejects a year before the 2018 anchor', () => {
     expect(() => SystemSchema.parse({ ...valid, year: 2017 })).toThrow()
+  })
+
+  // --- Guard boundary. A trailing dot is the FQDN root label: the browser
+  // resolves `host.` and `host` to the SAME server, so without normalisation
+  // one keystroke defeats the guard entirely. `%2e` is the encoded form and
+  // the URL parser decodes it into the same trailing dot.
+  it('rejects a private host disguised with a trailing dot', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: `https://${PRIVATE_HOSTS[0]}./login` }),
+    ).toThrow(/private/i)
+  })
+
+  it('rejects a private host disguised with a percent-encoded dot', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: `https://${PRIVATE_HOSTS[0]}%2e/login` }),
+    ).toThrow(/private/i)
+  })
+
+  // The guard must be precise in BOTH directions — over-blocking would silently
+  // drop legitimate client links, which is its own kind of failure.
+  it('does not reject the legitimate apex domain', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: 'https://medicalofficeforce.co/' }),
+    ).not.toThrow()
+  })
+
+  it('does not reject a different host that merely contains the private host', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: 'https://ai-uat.medicalofficeforce.co.attacker.io/' }),
+    ).not.toThrow()
   })
 })
 ```
@@ -231,9 +260,22 @@ export const PRIVATE_HOSTS = ['ai-uat.medicalofficeforce.co'] as const
 /** First paid backend work. Every "years of experience" figure derives from this. */
 export const CAREER_START_YEAR = 2018
 
+/**
+ * The hostname, normalised for comparison.
+ *
+ * The trailing dot matters. `ai-uat.example.co.` is the fully-qualified form of
+ * `ai-uat.example.co` — DNS treats the trailing dot as the root label and both
+ * names resolve to the SAME server. `new URL()` preserves it verbatim, so a naive
+ * `hostname === host` check lets `https://ai-uat.example.co./login` through while
+ * still loading the client's private environment. The URL parser also decodes
+ * `%2e` into a literal dot, which lands in the same place.
+ *
+ * Stripping trailing dots closes both. `URL.hostname` already lowercases, so case
+ * variation is handled for free.
+ */
 const hostOf = (url: string): string | null => {
   try {
-    return new URL(url).hostname
+    return new URL(url).hostname.replace(/\.+$/, '')
   } catch {
     return null
   }
@@ -268,7 +310,12 @@ export type System = z.infer<typeof SystemSchema>
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `npm test -- schema`
-Expected: PASS — 6 passed.
+Expected: PASS — 10 passed.
+
+> **Note on zod 4.** The installed zod is v4, where `z.string().url()` is deprecated in
+> favour of `z.url()`. Use `z.url().optional()`. Behaviour is equivalent (verified: same
+> accept/reject on malformed strings and on non-string inputs), and `z.infer` still yields
+> a plain checked object type after chained `.refine()` calls, so `System[]` works in Task 3.
 
 - [ ] **Step 5: Commit**
 

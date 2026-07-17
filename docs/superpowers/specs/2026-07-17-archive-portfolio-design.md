@@ -99,6 +99,15 @@ Rules:
 2. **Never link a client's private or staging environment.** Specifically:
    `ai-uat.medicalofficeforce.co` is a UAT environment behind a login and **must not be
    linked**. The work is describable; the link is not publishable.
+
+   This is enforced in `src/content/schema.ts` as a build failure, not a convention.
+   **The comparison must normalise the hostname first.** A naive `hostname === host` check
+   is bypassable: `https://ai-uat.medicalofficeforce.co./login` — one trailing dot — has a
+   different `hostname` string but resolves to the *same server*, because DNS treats the
+   trailing dot as the root label. `%2e` is the percent-encoded form and the URL parser
+   decodes it to the same place. Strip trailing dots before comparing. (`URL.hostname`
+   already lowercases, so case is handled.) Do not "simplify" this away — it was found by
+   review after the naive version shipped, and the guard is worthless without it.
 3. **Never let a link imply ownership of the linking company.** `servicenow.com` and
    `goodfin.com` are large third-party companies. Listing them with a bare link reads as
    claiming the company. These require explicit scope wording before publication — see
