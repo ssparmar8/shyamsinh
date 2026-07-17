@@ -48,6 +48,18 @@ constructor that throws" **passed for the wrong reason**: it never reached its o
 `Error('blocked')`, it hit the constructor TypeError instead. Another test passing while
 testing nothing.
 
+**3. `useOnScreen`'s default margin now shrinks only the bottom edge.** It was `-10%` on
+all four edges, which meant an above-the-fold hero never intersected and its decode never
+ran — it sat on raw noise forever. Now `'0px 0px -10% 0px'`. Do not revert it.
+
+**4. The in-app preview browser reports `document.visibilityState: "hidden"`, which
+freezes IntersectionObserver.** IO callbacks do not fire there — for ANY element, at ANY
+margin — so the preview pane will make every scroll-reveal look "dead" and every
+frame-count read 1. **Verify IntersectionObserver-driven animation with Playwright, not the
+preview pane.** A visible Playwright page fires IO normally. This cost real time in Task 3;
+do not repeat it. (Non-IO checks — computed styles, DOM shape, curl'd HTML — are fine in
+the preview pane.)
+
 ## Non-negotiables
 
 1. **Content is never gated from a crawler or a no-JS visitor.** The gate is an overlay over server-rendered content. Verify with `curl` that `/`'s full text is in the initial HTML *while the gate exists*.
