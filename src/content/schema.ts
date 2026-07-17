@@ -5,7 +5,7 @@ import { z } from 'zod'
  * `ai-uat.medicalofficeforce.co` is a client's UAT environment behind a login.
  * Publishing it would expose a client's internal system — see spec §5.2.
  */
-export const PRIVATE_HOSTS = ['ai-uat.medicalofficeforce.co'] as const
+export const PRIVATE_HOSTS: readonly string[] = ['ai-uat.medicalofficeforce.co']
 
 /** First paid backend work. Every "years of experience" figure derives from this. */
 export const CAREER_START_YEAR = 2018
@@ -31,6 +31,19 @@ const hostOf = (url: string): string | null => {
   }
 }
 
+/**
+ * Is this hostname the private host, or anything under it?
+ *
+ * Matches the host itself and any subdomain of it (`app.ai-uat.example.co`), since
+ * a subdomain of a client's UAT environment is still that client's UAT environment.
+ * The dot in the suffix check is what keeps it precise: `ai-uat.example.co.evil.com`
+ * does NOT end with `.ai-uat.example.co`, so a lookalike registered elsewhere is
+ * correctly left alone. Over-blocking would silently drop legitimate client links,
+ * which is its own kind of failure.
+ */
+const isPrivateHost = (host: string): boolean =>
+  PRIVATE_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))
+
 export const SystemSchema = z
   .object({
     slug: z.string().regex(/^[a-z0-9-]+$/, 'slug must be lowercase, url-safe'),
@@ -45,7 +58,7 @@ export const SystemSchema = z
     status: z.enum(['LIVE', 'PRIVATE']),
     featured: z.boolean(),
   })
-  .refine((s) => !(s.url && (PRIVATE_HOSTS as readonly string[]).includes(hostOf(s.url) ?? '')), {
+  .refine((s) => !(s.url && isPrivateHost(hostOf(s.url) ?? '')), {
     message: 'url points at a known-private host and must not be published',
     path: ['url'],
   })

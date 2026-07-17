@@ -76,4 +76,25 @@ describe('SystemSchema', () => {
       SystemSchema.parse({ ...valid, url: 'https://ai-uat.medicalofficeforce.co.attacker.io/' }),
     ).not.toThrow()
   })
+
+  it('rejects a subdomain of a private host', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: `https://app.${PRIVATE_HOSTS[0]}/x` }),
+    ).toThrow(/private/i)
+  })
+
+  /**
+   * Anchored to the LITERAL host, deliberately not to `PRIVATE_HOSTS[0]`.
+   *
+   * Every other must-block test above derives its url from the constant, so they
+   * all stay green if someone fat-fingers the constant itself — leaving the real
+   * client link completely unguarded while the suite reports success. This test is
+   * the only one that fails in that case. Do not "DRY" it up against the constant;
+   * the duplication is the entire point.
+   */
+  it('rejects the real client UAT host, spelled out', () => {
+    expect(() =>
+      SystemSchema.parse({ ...valid, url: 'https://ai-uat.medicalofficeforce.co/login' }),
+    ).toThrow(/private/i)
+  })
 })
