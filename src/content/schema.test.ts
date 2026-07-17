@@ -17,12 +17,31 @@ const valid = {
 }
 
 describe('SystemSchema', () => {
+  /**
+   * The fixture must be valid, and this must be the first thing asserted.
+   *
+   * Zod does not run `.refine()` once the base object parse fails. So if `valid`
+   * ever drifts out of sync with the schema — a new required field is added and
+   * not added here — every guard test below starts failing on "missing field"
+   * without ever reaching the guard it claims to test. That is not hypothetical:
+   * adding the `sector` field did exactly this, and the two tests that assert a
+   * bare `.toThrow()` stayed GREEN throughout, because something did throw.
+   *
+   * A quieter version of that change leaves the UAT-link guard untested while the
+   * suite reports success. This test is the tripwire for it.
+   */
+  it('the fixture itself is valid — guard tests below are worthless otherwise', () => {
+    expect(() => SystemSchema.parse(valid)).not.toThrow()
+  })
+
   it('accepts a well-formed system', () => {
     expect(SystemSchema.parse(valid)).toMatchObject({ slug: 'aiva' })
   })
 
   it('rejects a slug that is not url-safe', () => {
-    expect(() => SystemSchema.parse({ ...valid, slug: 'AIVA Chat' })).toThrow()
+    // Asserts the MESSAGE, not a bare .toThrow(). A bare throw assertion passes
+    // when the parse fails for an unrelated reason — see the fixture note above.
+    expect(() => SystemSchema.parse({ ...valid, slug: 'AIVA Chat' })).toThrow(/slug/i)
   })
 
   it('rejects a url pointing at a known-private host', () => {
@@ -45,7 +64,8 @@ describe('SystemSchema', () => {
   })
 
   it('rejects a year before the 2018 anchor', () => {
-    expect(() => SystemSchema.parse({ ...valid, year: 2017 })).toThrow()
+    // Asserts the message so this can't pass because the fixture broke instead.
+    expect(() => SystemSchema.parse({ ...valid, year: 2017 })).toThrow(/>=\s*2018/)
   })
 
   // --- Guard boundary. A trailing dot is the FQDN root label: the browser

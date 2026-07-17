@@ -47,6 +47,16 @@ describe('SYSTEMS content', () => {
     expect(getArchive().every((s) => !s.featured)).toBe(true)
   })
 
+  /**
+   * Pins the headline figures. A change here must be deliberate: these numbers are
+   * rendered next to Shyamsinh's name, and earlier drafts of this project claimed
+   * "20 systems across 6 domains and 4 regions" when the truth was 18 / 9 / 3.
+   *
+   * `sector` drift is already prevented structurally — it's a zod enum, so a new
+   * vertical requires editing the enum on purpose. There is deliberately no
+   * "sectors stay coarse" heuristic here; one existed briefly and was removed for
+   * asserting something other than what its name claimed.
+   */
   it('has 9 sectors across 18 systems', () => {
     expect(countSectors()).toBe(9)
     expect(SYSTEMS).toHaveLength(18)
@@ -55,11 +65,5 @@ describe('SYSTEMS content', () => {
   it('counts 3 client regions and 4 map regions including home', () => {
     expect(countClientRegions()).toBe(3)
     expect(countRegions()).toBe(4)
-  })
-
-  it('keeps sectors coarse — no sector has only one system unless it genuinely stands alone', () => {
-    // Guard against sector-per-project drift, which would make the count meaningless
-    // again. If this fires, the sector list has grown too fine-grained.
-    expect(countSectors()).toBeLessThanOrEqual(SYSTEMS.length / 2)
   })
 })
