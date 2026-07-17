@@ -1255,14 +1255,35 @@ test.describe('the entry experience', () => {
     await expect(page.getByRole('heading', { name: 'AIVA Chat' })).toBeVisible()
   })
 
-  test('record routes ship no animation libraries', async ({ page }) => {
-    const heavy: string[] = []
-    page.on('request', (r) => {
-      if (/three|gsap|lenis/i.test(r.url())) heavy.push(r.url())
+  // A JS chunk "is" an animation lib if its BODY contains a marker string. Hashed
+  // chunk NAMES never contain "lenis"/"three"/"gsap", so matching r.url() gives a
+  // false pass while the chunk loads — this is exactly how a Lenis prefetch leak
+  // into /archive and /contact hid until it was checked by content. Also scroll to
+  // the bottom first: Next viewport-prefetches a static route's whole bundle when a
+  // <Link> to it enters view, so a leak only appears once the link is on screen.
+  async function animLibLoaded(page: import('@playwright/test').Page, path: string) {
+    const jsUrls: string[] = []
+    page.on('response', (r) => { if (r.url().endsWith('.js')) jsUrls.push(r.url()) })
+    await page.goto(path)
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await page.waitForTimeout(1500)
+    for (const u of jsUrls) {
+      const body = await page.request.get(u).then((r) => r.text()).catch(() => '')
+      if (/lenisVersion|smoothWheel|THREE\.|gsap/i.test(body)) return u
+    }
+    return null
+  }
+
+  for (const path of ['/systems/aiva', '/archive', '/contact']) {
+    test(`${path} ships no animation library, even scrolled to the bottom`, async ({ page }) => {
+      expect(await animLibLoaded(page, path), `an animation lib leaked into ${path}`).toBeNull()
     })
-    await page.goto('/systems/aiva')
-    await page.waitForLoadState('networkidle')
-    expect(heavy).toEqual([])
+  }
+
+  test('/ DOES load Lenis — proves the detector actually works', async ({ page }) => {
+    // A green "no leak" result is worthless if the detector can't detect. This is
+    // the control: if it fails, the checks above are passing vacuously.
+    expect(await animLibLoaded(page, '/')).not.toBeNull()
   })
 })
 
@@ -1322,6 +1343,17 @@ git commit -m "test(e2e): cover the entry experience and the escape hatch"
 - [ ] Nothing clipped and no horizontal scroll at 375px
 
 ## Known limitations (deliberately deferred)
+
+- **The mouse wheel scrolls the background while the gate/boot is up.** `EntryOverlay` locks
+  scroll with `document.body.style.overflow = 'hidden'`, which blocks the browser's native
+  scroll but NOT Lenis's scripted `scrollTo` after it `preventDefault()`s the wheel. So a
+  first-time visitor who spins the wheel while reading the gate lands mid-page the instant it
+  dismisses. Keyboard scroll is correctly blocked; only the wheel leaks. **This is a Plan 3
+  requirement, not a Plan 2 patch:** Plan 3 replaces this interim `page.tsx` with the
+  eight-beat cinematic homepage and rebuilds the Lenis↔overlay↔scroll coordination together.
+  Fixing it here (e.g. a shared entry-active store that calls `lenis.stop()/start()`) means
+  building coordination Plan 3 reworks anyway. The clean home for it is Plan 3's mount, where
+  Lenis should simply not start until the entry is dismissed.
 
 - **Reduced-motion flipped true→false mid-session re-shows the gate.** A first-time visitor
   who toggles their OS reduced-motion setting while reading the page will see the audio
