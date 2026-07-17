@@ -13,10 +13,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
-      </body>
+    // The font variable classes belong on <html>, not <body> — this is what
+    // create-next-app and the Next.js 16 docs both do. Tailwind's @theme resolves
+    // theme variables at :root; if --font-geist-* is only defined on a descendant,
+    // the resolution fails silently and every element falls back to the system font.
+    // globals.css guards the same failure from the other side with `@theme inline`.
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="antialiased">{children}</body>
     </html>
   )
 }

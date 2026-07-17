@@ -20,11 +20,35 @@
   --color-border: #00000022;
   --color-hair:   #00000010;
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
-
   --tracking-hud:  0.2em;
   --tracking-wide: 0.42em;
+}
+
+/*
+ * Fonts must use `@theme inline`, and the two rules below are not interchangeable.
+ *
+ * `next/font` defines --font-geist-* on whichever element carries its generated
+ * class (see layout.tsx: <html>). A plain `@theme` would declare --font-mono on
+ * :root as `var(--font-geist-mono), …` and resolve it AT :root — where, if the
+ * font class sat on <body>, the reference would be invalid at computed-value time,
+ * collapse to empty at the root, and inherit down empty. Every `font-mono` element
+ * would silently render the system font instead. No error is raised.
+ *
+ * `inline` makes Tailwind substitute this value straight into the utility
+ * (`.font-mono { font-family: var(--font-geist-mono), … }`), so the lookup happens
+ * on the element, which inherits the variable normally.
+ *
+ * The colours above deliberately stay in a non-inline `@theme`, because components
+ * reference them directly as `text-[var(--color-dim)]` — that needs the variable to
+ * exist at runtime, not be inlined away.
+ *
+ * This is not theoretical: create-next-app emitted `@theme inline` here, an earlier
+ * draft of this file dropped the `inline`, and the entire site rendered in the
+ * browser's default sans while every test stayed green.
+ */
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 body {
