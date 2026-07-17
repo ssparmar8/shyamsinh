@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-bg:     #e9e9e9;
+  --color-panel:  #f4f4f4;
+  --color-ink:    #2b2b2b;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /*
+   * TEXT greys must clear WCAG AA 4.5:1 at the 10px label sizes this site uses.
+   * The reference site's #8d8d8d scores 2.73:1 on #e9e9e9 — it fails badly for text,
+   * and copying it verbatim would make every HUD label on this site unreadable to
+   * anyone with low vision or a sunlit screen. Measured values:
+   *   --color-dim   #696969 → 4.52:1 on bg, 4.99:1 on panel. Safe for any text.
+   *   --color-ghost #8d8d8d → decorative ONLY. Never on text. Brackets and lines.
+   * Do not use --color-ghost for a label, however small. See spec §13.
+   */
+  --color-dim:    #696969;
+  --color-ghost:  #8d8d8d;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-border: #00000022;
+  --color-hair:   #00000010;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  --tracking-hud:  0.2em;
+  --tracking-wide: 0.42em;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+}
+
+/* The 26px archive grid — spec §10. */
+.hud-grid {
+  background-image:
+    linear-gradient(var(--color-hair) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-hair) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
