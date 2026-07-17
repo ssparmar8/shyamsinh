@@ -6,15 +6,24 @@ export const IDENTITY = {
   location: 'Gujarat, India',
   locationCode: 'IN',
   email: 'parmarshyamsingh8@gmail.com',
-  // UNVERIFIED. The source documents give display names, not URLs — these hrefs are
-  // constructed guesses. Each must be opened and confirmed to resolve before launch,
-  // or the row dropped. A dead link in the contact section is worse than a missing one.
+  /**
+   * The source documents gave display names, not URLs, so early drafts of this list
+   * were guesses — and the guesses were wrong. Upwork and LinkedIn both pointed at
+   * nothing. Verification status per row is noted below; do not add a row here
+   * without opening it. A dead link in the contact section is worse than no link.
+   */
   links: [
-    { label: 'LINKEDIN', href: 'https://www.linkedin.com/in/shyamsinh-parmar-7ba284167/' },
+    // Supplied by Shyamsinh directly. The `?mp_source=share` tracking parameter his
+    // share link carried is stripped deliberately — it is share attribution, not part
+    // of the address.
+    { label: 'UPWORK', href: 'https://www.upwork.com/freelancers/~017c3a05a797c7d41a' },
+    // Verified: live profile, name/stack/location all match.
     { label: 'GITHUB', href: 'https://github.com/ssparmar8' },
     { label: 'WOYCE TECH', href: 'https://github.com/woyce-tech' },
-    { label: 'UPWORK', href: 'https://www.upwork.com/freelancers/~shyamsinhparmar' },
     { label: 'FIVERR', href: 'https://www.fiverr.com/ssparmar8' },
+    // UNCONFIRMED. Found by search, not supplied — name, GTU education and Rajkot
+    // location match, but Shyamsinh has not confirmed it. Confirm or drop before launch.
+    { label: 'LINKEDIN', href: 'https://www.linkedin.com/in/shyamsinh-parmar-7ba284167/' },
   ],
 } as const
 
