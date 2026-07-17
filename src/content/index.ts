@@ -13,6 +13,21 @@ export const getBySlug = (slug: string): System | undefined =>
 
 export const getAllSlugs = (): string[] => SYSTEMS.map((s) => s.slug)
 
+/**
+ * The archive number for a system: its position in the canonical list, 1-based.
+ *
+ * Must be derived from the FULL list, not from `getFeatured()`. An earlier version
+ * used `getFeatured().findIndex(...)`, which returns -1 for all 12 archive systems
+ * and fell back to 0 — so 13 of 18 records rendered as "RECORD 01", with only 6
+ * unique numbers across the whole archive. A catalogue where thirteen entries share
+ * a number is not a catalogue.
+ *
+ * Anchored to declaration order rather than a sort, so a record's number is stable:
+ * a project's catalogue number shouldn't change because a newer one shipped.
+ */
+export const recordNumber = (slug: string): number =>
+  SYSTEMS.findIndex((s) => s.slug === slug) + 1
+
 export const countSystems = (): number => SYSTEMS.length
 
 export const countSectors = (): number => new Set(SYSTEMS.map((s) => s.sector)).size

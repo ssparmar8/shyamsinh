@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getBySlug, getAllSlugs, getFeatured } from '@/content'
+import { getBySlug, getAllSlugs, recordNumber } from '@/content'
 import { HudFrame } from '@/components/hud/HudFrame'
 import { SystemRecord } from '@/components/record/SystemRecord'
 
@@ -34,7 +34,9 @@ export default async function SystemPage({
   const system = getBySlug(slug)
   if (!system) notFound()
 
-  const index = getFeatured().findIndex((s) => s.slug === slug)
+  // recordNumber() spans all 18 records. Deriving this from getFeatured() made
+  // every archive system render as RECORD 01 — 13 of 18 shared one number.
+  const index = recordNumber(slug) - 1
 
   return (
     <HudFrame label="ARCHIVE://">

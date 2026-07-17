@@ -9,6 +9,7 @@ import {
   countClientRegions,
   countRegions,
   countOwnProducts,
+  recordNumber,
 } from './index'
 
 describe('SYSTEMS content', () => {
@@ -82,6 +83,22 @@ describe('SYSTEMS content', () => {
     expect(aiva?.engagement).toBe('Own product')
     expect(aiva?.region).toBe('IN')
     expect(aiva?.role).not.toMatch(/contract/i)
+  })
+
+  /**
+   * Every record needs its own number. A previous version derived it from
+   * getFeatured(), which returns -1 for archive systems and fell back to 0 —
+   * 13 of 18 records rendered as "RECORD 01".
+   */
+  it('gives every system a unique, stable record number', () => {
+    const numbers = SYSTEMS.map((s) => recordNumber(s.slug))
+    expect(new Set(numbers).size).toBe(SYSTEMS.length)
+    expect(Math.min(...numbers)).toBe(1)
+    expect(Math.max(...numbers)).toBe(SYSTEMS.length)
+  })
+
+  it('returns 0 for an unknown slug rather than silently colliding with record 1', () => {
+    expect(recordNumber('nope')).toBe(0)
   })
 
   it('own products never inflate the client-region count', () => {
