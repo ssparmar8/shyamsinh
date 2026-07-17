@@ -442,7 +442,11 @@ export const TRAJECTORY = [
   { year: 2015, label: 'DIPLOMA · GTU',       note: '+3 YRS',  detail: 'Sanjaybhai Rajguru · CGPA 8.68' },
   { year: 2018, label: 'B.E. · GTU',          note: '+3 YRS',  detail: 'Marwadi · S.P.I. 6.0' },
   { year: 2018, label: 'FIRST BACKEND SYSTEM', note: '',       detail: '' },
-  { year: 2026, label: 'AI & BACKEND ARCHITECT', note: '',     detail: '20 SYSTEMS · 6 DOMAINS · 4 REGIONS' },
+  // detail stays EMPTY. Counts are composed by the UI from countSystems() /
+  // countSectors() / countClientRegions(), never hardcoded here — a literal
+  // "20 SYSTEMS · 6 DOMAINS · 4 REGIONS" once lived on this line and all three
+  // numbers were wrong. If a number can't be derived, it doesn't ship.
+  { year: 2026, label: 'AI & BACKEND ARCHITECT', note: '',     detail: '' },
 ] as const
 
 export const CONTINUITY = 'NO BREAK SINCE 2018'
@@ -740,8 +744,23 @@ export const getBySlug = (slug: string): System | undefined =>
 export const getAllSlugs = (): string[] => SYSTEMS.map((s) => s.slug)
 
 export const countSystems = (): number => SYSTEMS.length
-export const countDomains = (): number => new Set(SYSTEMS.map((s) => s.domain)).size
-export const countRegions = (): number => new Set(SYSTEMS.map((s) => s.region)).size
+export const countSectors = (): number => new Set(SYSTEMS.map((s) => s.sector)).size
+
+/**
+ * Regions on the map: every client region, plus home.
+ *
+ * Clients are in US/CA/DK; Shyamsinh works from IN. The telemetry map renders all
+ * four as nodes — three client, one home, drawn distinctly — so "4 regions"
+ * describes what is literally on screen. It does NOT mean four regions of
+ * *clients*. Never render this next to the system count as "N systems across 4
+ * regions" — that would be false. Use `countClientRegions()` for any claim about
+ * where the work actually went.
+ */
+export const countRegions = (): number =>
+  new Set([...SYSTEMS.map((s) => s.region), IDENTITY.locationCode]).size
+
+/** Distinct regions the work was actually delivered to. Currently 3 (US, CA, DK). */
+export const countClientRegions = (): number => new Set(SYSTEMS.map((s) => s.region)).size
 
 export { SYSTEMS }
 export type { System }
@@ -1406,7 +1425,7 @@ Create `src/app/page.tsx`:
 ```tsx
 import Link from 'next/link'
 import { IDENTITY, yearsExperience } from '@/content/identity'
-import { getFeatured, countSystems, countDomains, countRegions } from '@/content'
+import { getFeatured, countSystems, countSectors, countClientRegions } from '@/content'
 import { HudFrame } from '@/components/hud/HudFrame'
 import { ScrambleText } from '@/components/text/ScrambleText'
 
@@ -1423,9 +1442,18 @@ export default function Home() {
           className="mt-3 font-mono text-2xl tracking-[var(--tracking-wide)] text-[var(--color-ink)] md:text-4xl"
         />
         <div className={`${LABEL} mt-3`}>{IDENTITY.title.toUpperCase()}</div>
+        {/*
+          Reads "N systems · N sectors · delivered to US·CA·DK". Uses
+          countClientRegions(), NOT countRegions() — the latter includes his own
+          base and would make this line claim work delivered to India. The map in
+          Plan 2 is where the 4-node figure belongs. See index.ts.
+        */}
         <div className={`${LABEL} mt-1`}>
-          {yearsExperience()} YRS · {countSystems()} SYSTEMS · {countDomains()} DOMAINS ·{' '}
-          {countRegions()} REGIONS · {IDENTITY.locationCode}
+          {yearsExperience()} YRS · {countSystems()} SYSTEMS · {countSectors()} SECTORS ·{' '}
+          {countClientRegions()} CLIENT REGIONS
+        </div>
+        <div className={`${LABEL} mt-1`}>
+          {IDENTITY.location.toUpperCase()} · REMOTE
         </div>
 
         <ul className="mt-14 space-y-3">
@@ -1479,7 +1507,7 @@ Create `src/app/archive/page.tsx`:
 ```tsx
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getFeatured, getArchive, countSystems } from '@/content'
+import { getFeatured, getArchive, countSystems, countSectors } from '@/content'
 import { HudFrame } from '@/components/hud/HudFrame'
 import type { System } from '@/content/schema'
 
@@ -1516,7 +1544,9 @@ export default function ArchivePage() {
         <h1 className="font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]">
           ARCHIVE INDEX
         </h1>
-        <div className={`${LABEL} mt-2`}>{countSystems()} SYSTEMS · BY YEAR</div>
+        <div className={`${LABEL} mt-2`}>
+          {countSystems()} SYSTEMS · {countSectors()} SECTORS · BY YEAR
+        </div>
 
         <div className={`${LABEL} mt-12`}>// FEATURED</div>
         <ul className="mt-3">

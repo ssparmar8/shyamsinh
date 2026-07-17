@@ -40,8 +40,25 @@ doesn't exist. Where the reference site optimizes purely for (1), we deviate.
 | Engagement model | Freelance contract |
 | Typical scope | Architecture + leading a small team |
 
-**Systems shipped:** 20 across 6 domains (healthcare, veterinary, legal, finance,
-hiring/HR, commerce) and 4 regions (US, Canada, Denmark, India).
+**Systems shipped:** 18 across 9 sectors, delivered to 3 client regions (US, Canada,
+Denmark) from India.
+
+> **Corrected 2026-07-17.** This originally read "20 across 6 domains and 4 regions."
+> Every number in that sentence was wrong, and the errors are instructive:
+> - **20 → 18.** ServiceNow and Goodfin are omitted pending scope confirmation (§15.1).
+> - **6 domains → 9 sectors.** "6 domains" was a hand-wave. The per-record `domain` field
+>   holds a specific descriptor ("Healthcare · EMR"), so counting distinct values returns
+>   ~one per project — a fact about project count, not breadth. `sector` is a separate,
+>   deliberately coarse enum that exists to be counted. Keep it short: a sector per project
+>   makes the number meaningless again.
+> - **4 regions → 3 client regions.** The fourth was India — where Shyamsinh *is*, not
+>   where a client is. No system carries `region: 'IN'`. `countRegions()` (= 4) counts map
+>   nodes including home and exists only for the telemetry section; `countClientRegions()`
+>   (= 3) is the only one permitted next to a claim about delivered work.
+>
+> All three were caught by implementers and reviewers refusing to fabricate data to fit
+> the spec. Numbers on this site derive from `src/content/`; if a number can't be derived,
+> it doesn't ship.
 
 ## 4. Concept and narrative
 
@@ -69,7 +86,7 @@ The spine here is a **climb**, stated flatly in archive syntax:
 2015 · DIPLOMA · GTU ......... +3 YRS     (CGPA 8.68)
 2018 · B.E. · GTU ............ +3 YRS     (S.P.I. 6.0)
 2018 · FIRST BACKEND SYSTEM
-2026 · AI & BACKEND ARCHITECT · 20 SYSTEMS
+2026 · AI & BACKEND ARCHITECT
 
 [ CONTINUITY ] : NO BREAK SINCE 2018
 ```
@@ -178,8 +195,15 @@ Decode sequence: canvas wakes, particles resolve, `LOADING` → `COMPLETE`.
 
 ### 02 · IDENTITY
 
-Name decodes out of scramble. Title, `8 YRS · 20 SYSTEMS · IN`. Live particle
-constellation behind.
+Name decodes out of scramble. Title, then `8 YRS · 18 SYSTEMS · 9 SECTORS · 3 CLIENT
+REGIONS`, with `GUJARAT, INDIA · REMOTE` on its own line. Live particle constellation
+behind.
+
+**Every figure on this line is derived** from `src/content/`, never typed by hand — that
+is what stops it drifting the way the three numbers in §3 originally did. Note the
+deliberate separation: the region figure here is `countClientRegions()` (3). The `4` from
+`countRegions()` belongs only to the telemetry map, where a home node is visibly drawn.
+Putting 4 next to the system count would assert work delivered to India. There is none.
 
 The only place the site states its claim plainly. Everything after is evidence.
 
