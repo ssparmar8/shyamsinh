@@ -28,6 +28,26 @@ Every task in Plan 1 found a defect that its own passing tests could not see. Th
 
 **Therefore, in this plan, a task is not done until someone has looked at it in a real browser.** Every task below carries a mandatory browser-verification step with a measurement, not a screenshot glance. "The test passes" is not evidence. A test whose name promises more than its assertion checks is worse than no test — three of those shipped in Plan 1.
 
+## Corrections found during execution — read before Tasks 3–7
+
+**1. `react-hooks/set-state-in-effect` rejects the "default safe, correct in an effect"
+pattern.** Tasks 1's original code used `useState(true)` + `useEffect(() => setReduced(...))`
+and failed lint (`eslint-plugin-react-hooks@7.1.1`, bundled with `eslint-config-next@16`).
+The rule was right. `usePrefersReducedMotion` is now `useSyncExternalStore` — `matchMedia`
+*is* an external store, and the hook handles the server→client handoff itself, so there is
+no mismatch and no setState-in-effect. `useOnScreen` is now a React 19 ref callback
+returning a cleanup, which fires exactly when the element attaches. **Any later task
+reaching for `useState` + `useEffect` to read a browser API should use one of these two
+shapes instead.**
+
+**2. `vi.fn(() => ctx)` cannot be used with `new` in Vitest 4.** It throws
+`TypeError: ... is not a constructor`. Use a `function` expression:
+`vi.fn(function () { return ctx })`. This matters more than it looks — in Task 2's suite
+the TypeError was swallowed by `AudioBus`'s own try/catch, so "survives an AudioContext
+constructor that throws" **passed for the wrong reason**: it never reached its own
+`Error('blocked')`, it hit the constructor TypeError instead. Another test passing while
+testing nothing.
+
 ## Non-negotiables
 
 1. **Content is never gated from a crawler or a no-JS visitor.** The gate is an overlay over server-rendered content. Verify with `curl` that `/`'s full text is in the initial HTML *while the gate exists*.
@@ -404,7 +424,7 @@ export const AudioBus = new Bus()
 export type { Sound }
 ```
 
-- [ ] **Step 4: Run it, watch it pass** — `npm test -- AudioBus` → 6 passed
+- [ ] **Step 4: Run it, watch it pass** — `npm test -- AudioBus` → 7 passed
 
 - [ ] **Step 5: Implement `src/lib/audio/useAudio.ts`**
 
