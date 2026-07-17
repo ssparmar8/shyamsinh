@@ -52,7 +52,11 @@ export default function ArchivePage() {
           {getArchive().map((s) => <Row key={s.slug} system={s} />)}
         </ul>
 
-        <Link href="/" className={`${LABEL} mt-10 inline-block hover:text-[var(--color-ink)]`}>
+        {/* prefetch={false}: this is a lean route, and / carries the heavy cinematic
+            bundle (Lenis now, WebGL later). Next viewport-prefetches a static route's
+            whole bundle when its link scrolls in; without this, the escape-hatch
+            routes silently pull the animation libs they exist to avoid. */}
+        <Link href="/" prefetch={false} className={`${LABEL} mt-10 inline-block hover:text-[var(--color-ink)]`}>
           ◂ BACK
         </Link>
       </main>

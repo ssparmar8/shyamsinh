@@ -27,7 +27,7 @@ export default function NotFound() {
         </p>
 
         <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2">
-          <Link href="/" className={`${LABEL} hover:text-[var(--color-ink)]`}>
+          <Link href="/" prefetch={false} className={`${LABEL} hover:text-[var(--color-ink)]`}>
             ◂ IDENTITY
           </Link>
           <Link href="/archive" className={`${LABEL} hover:text-[var(--color-ink)]`}>

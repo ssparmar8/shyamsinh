@@ -50,7 +50,9 @@ export default function ContactPage() {
           ))}
         </ul>
 
-        <Link href="/" className={`${LABEL} mt-16 hover:text-[var(--color-ink)]`}>
+        {/* prefetch={false}: keep this lean route from viewport-prefetching /'s
+            heavy cinematic bundle. See archive/page.tsx for the full rationale. */}
+        <Link href="/" prefetch={false} className={`${LABEL} mt-16 hover:text-[var(--color-ink)]`}>
           ◂ BACK
         </Link>
       </main>
