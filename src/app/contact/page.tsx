@@ -16,9 +16,17 @@ export default function ContactPage() {
       <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-24">
         <div className={LABEL}>{'// UPLINK'}</div>
 
+        {/*
+          break-all and the tighter mobile tracking are load-bearing, not styling.
+          `parmarshyamsingh8@gmail.com` has no space or hyphen, so it offers the
+          browser no break opportunity: at 375px it needed 360px inside a 327px box,
+          clipped to "…gmail.con", and dragged the whole page into horizontal scroll.
+          On the one page whose entire job is showing a client the address.
+          A wrapped monospace address suits a terminal readout anyway.
+        */}
         <a
           href={`mailto:${IDENTITY.email}`}
-          className="mt-4 font-mono text-lg tracking-[0.14em] text-[var(--color-ink)] underline underline-offset-8 md:text-2xl"
+          className="mt-4 break-all font-mono text-base tracking-[0.08em] text-[var(--color-ink)] underline underline-offset-8 md:text-2xl md:tracking-[0.14em]"
         >
           {IDENTITY.email}
         </a>
