@@ -440,7 +440,7 @@ export function Renderer2D({ count }: { count: number }) {
 
 - [ ] **Step 7: MANDATORY browser verification (Playwright — the preview pane freezes rAF)**
 
-Build a probe route (no leading underscore) mounting `<Renderer2D count={80} />`. In Playwright, sample the canvas: capture `toDataURL()` at two moments ~300ms apart; assert they DIFFER (the field is moving). Then set the tab hidden (`page.evaluate(() => Object.defineProperty(document,'hidden',{value:true,configurable:true})); dispatchEvent(new Event('visibilitychange'))`) and confirm the frames STOP changing. Report both. **Delete the probe.**
+Build a probe route (no leading underscore) mounting `<Renderer2D count={80} />`. In Playwright, sample the canvas: capture `toDataURL()` at two moments ~300ms apart; assert they DIFFER (the field is moving). (`toDataURL` is reliable for the 2D renderer; for the WebGL path in Task 3, use `locator('canvas').screenshot()` instead — see the note there.) Then set the tab hidden (`page.evaluate(() => Object.defineProperty(document,'hidden',{value:true,configurable:true})); dispatchEvent(new Event('visibilitychange'))`) and confirm the frames STOP changing. Report both. **Delete the probe.**
 
 - [ ] **Step 8: Commit**
 
@@ -616,8 +616,15 @@ export function Constellation() {
 
 - [ ] **Step 4: MANDATORY browser verification (Playwright)**
 
+> **Reading a WebGL canvas:** `toDataURL()`/`getImageData()` are UNRELIABLE against this
+> renderer — it's constructed without `preserveDrawingBuffer`, so the browser may clear the
+> buffer right after compositing and an out-of-band read races that clear, returning blank.
+> Both the Task 3 and Task 4 agents hit this and lost time to a false "frozen" reading.
+> **Use Playwright's `locator('canvas').screenshot()` (real composited pixels) and compare
+> hashes** for anything touching the WebGL path. `toDataURL` is fine for the 2D renderer only.
+
 Probe route mounting `<Constellation />` on a WebGL-capable Playwright chromium:
-1. A `<canvas>` exists and its rendered pixels CHANGE across ~300ms (`toDataURL` differs) — the WebGL field animates.
+1. A `<canvas>` exists and its composited pixels CHANGE across ~300ms (screenshot hashes differ) — the WebGL field animates.
 2. The Three chunk loads on the probe but the WebGL path is chosen (check `renderer.domElement` is a WebGL canvas — `getContext('webgl')` is non-null on it).
 3. Hidden tab → frames stop.
 4. Force `WebGLRenderingContext` unavailable (block it in an init script) and confirm the component falls back to the 2D renderer (a 2D canvas still animates) — the fallback path, exercised.
