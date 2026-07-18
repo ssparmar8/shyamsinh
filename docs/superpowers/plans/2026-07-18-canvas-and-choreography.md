@@ -840,6 +840,19 @@ git commit -m "test(e2e): cover the constellation, reveals, and the eight-beat h
 - [ ] No horizontal scroll at 375px anywhere on `/`
 - [ ] The site is deployable and the static routes are unchanged in speed
 
+## Found during execution, deferred (low severity, decorative-only)
+
+- **WebGL context-loss is unhandled.** If the GPU resets (rare on desktop, plausible on
+  mobile backgrounding), `RendererWebGL` has no `webglcontextlost`/`restored` listener, so
+  the constellation freezes permanently. It's a silently-frozen decorative background, never
+  a crash, and content is never gated on it. Add a listener that `preventDefault()`s loss and
+  rebuilds on restore if this ever shows up in the wild.
+- **The two renderers fade links differently.** `Renderer2D` fades each link's opacity by
+  distance (`0.18 × (1 − dist/120)`); `RendererWebGL`'s `LineBasicMaterial` uses a flat 0.14.
+  Both are faint grey on near-white and no single visitor sees both, so the inconsistency is
+  invisible in practice — but matching them (per-link vertex alpha in WebGL) would make the
+  fallback a pixel-exact match. Low priority.
+
 ## Deferred / out of scope
 
 - Pinned-scroll choreography (owner chose scroll-reveals). If wanted later, it layers on the same sections.
