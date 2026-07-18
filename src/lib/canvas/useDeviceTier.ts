@@ -32,7 +32,7 @@ const hasWebGL = (): boolean => {
   }
 }
 
-const read = (): Tier =>
+const compute = (): Tier =>
   pickTier({
     reduced:
       typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -41,15 +41,46 @@ const read = (): Tier =>
     small: typeof innerWidth !== 'undefined' ? innerWidth < 768 : false,
   })
 
-// Capability doesn't change during a session; a static server snapshot is correct
-// and keeps hydration stable. 'none' on the server means no canvas renders until
-// the client confirms — content never depends on it.
+/**
+ * The cached snapshot. `useSyncExternalStore` demands a REFERENTIALLY STABLE value
+ * from getSnapshot — if it returns a new object each call, React sees "changed" on
+ * every render and loops forever (React #185, "Maximum update depth exceeded"). The
+ * first version recomputed `pickTier` inline and crashed `Constellation` on mount.
+ * We recompute only when the tier's VALUES actually change, and otherwise hand back
+ * the same reference.
+ */
+let cached: Tier | null = null
+
+const read = (): Tier => {
+  const next = compute()
+  if (cached && cached.renderer === next.renderer && cached.count === next.count) {
+    return cached
+  }
+  cached = next
+  return cached
+}
+
+/**
+ * Capability (WebGL support, core count) can't change mid-session, but two inputs
+ * can: reduced-motion can be toggled, and a resize can cross the 768px breakpoint or
+ * an orientation change. Subscribe to both so the tier updates — and so the cache
+ * above gets a chance to produce a fresh reference React will actually observe.
+ */
+const subscribe = (onChange: () => void): (() => void) => {
+  if (typeof window === 'undefined') return () => {}
+  const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
+  mq?.addEventListener('change', onChange)
+  addEventListener('resize', onChange)
+  return () => {
+    mq?.removeEventListener('change', onChange)
+    removeEventListener('resize', onChange)
+  }
+}
+
+// A static server snapshot keeps hydration stable. 'none' on the server means no
+// canvas renders until the client confirms capability — content never depends on it.
 const serverTier: Tier = { renderer: 'none', count: 0 }
 
 export function useDeviceTier(): Tier {
-  return useSyncExternalStore(
-    () => () => {},
-    read,
-    () => serverTier,
-  )
+  return useSyncExternalStore(subscribe, read, () => serverTier)
 }
