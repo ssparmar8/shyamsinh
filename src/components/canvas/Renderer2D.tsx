@@ -2,10 +2,15 @@
 
 import { useEffect, useRef } from 'react'
 import { createField, stepField, nearLinks, type Particle } from '@/lib/canvas/simulation'
+import { hexBipyramid, rotateProject } from '@/lib/canvas/wireframe'
 import { useRafLoop } from '@/lib/canvas/useRafLoop'
 
 const LINK_DIST = 120
 const INK = '#8d8d8d' // decorative only — never text, so the AA rule doesn't apply
+const WIRE = hexBipyramid()
+const WIRE_TILT = 0.4
+const WIRE_SPIN = 0.0002
+const WIRE_SCALE = 0.18
 
 /**
  * The 2D-canvas constellation: the mandatory fallback, and a complete feature.
@@ -18,6 +23,7 @@ export function Renderer2D({ count }: { count: number }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const fieldRef = useRef<Particle[]>([])
   const sizeRef = useRef({ w: 0, h: 0 })
+  const spinRef = useRef(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -70,6 +76,20 @@ export function Renderer2D({ count }: { count: number }) {
       ctx.arc(p.x, p.y, 1.4, 0, Math.PI * 2)
       ctx.fill()
     }
+    ctx.globalAlpha = 1
+
+    // Centerpiece: same geometry + projection as the WebGL renderer.
+    spinRef.current += WIRE_SPIN * dt
+    const scale = Math.min(w, h) * WIRE_SCALE
+    const pts = rotateProject(WIRE.vertices, WIRE_TILT, spinRef.current, scale, w / 2, h / 2)
+    ctx.globalAlpha = 0.28
+    ctx.strokeStyle = INK
+    ctx.beginPath()
+    for (const [i, j] of WIRE.edges) {
+      ctx.moveTo(pts[i].x, pts[i].y)
+      ctx.lineTo(pts[j].x, pts[j].y)
+    }
+    ctx.stroke()
     ctx.globalAlpha = 1
   }, true)
 
