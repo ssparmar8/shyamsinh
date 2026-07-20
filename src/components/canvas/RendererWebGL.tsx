@@ -3,10 +3,15 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { createField, stepField, nearLinks, type Particle } from '@/lib/canvas/simulation'
+import { hexBipyramid, rotateProject } from '@/lib/canvas/wireframe'
 import { useRafLoop } from '@/lib/canvas/useRafLoop'
 
 const LINK_DIST = 120
 const INK = new THREE.Color('#8d8d8d')
+const WIRE = hexBipyramid()
+const WIRE_TILT = 0.4 // fixed X tilt so the crystal reads as 3D
+const WIRE_SPIN = 0.0002 // rad/ms on Y ≈ one revolution / ~30s
+const WIRE_SCALE = 0.18 // of min(w, h)
 
 /**
  * The WebGL constellation, drawn with raw Three.js (no react-three-fiber — one
@@ -27,7 +32,9 @@ export function RendererWebGL({ count }: { count: number }) {
     camera: THREE.OrthographicCamera
     points: THREE.Points
     lines: THREE.LineSegments
+    wire: THREE.LineSegments
     field: Particle[]
+    spin: number
     w: number
     h: number
   } | null>(null)
@@ -69,7 +76,15 @@ export function RendererWebGL({ count }: { count: number }) {
       new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.14 }),
     )
 
-    scene.add(points, lines)
+    const wireGeo = new THREE.BufferGeometry()
+    // 18 edges × 2 endpoints × 3 floats
+    wireGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(WIRE.edges.length * 6), 3))
+    const wire = new THREE.LineSegments(
+      wireGeo,
+      new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.28 }),
+    )
+
+    scene.add(points, lines, wire)
 
     const resize = () => {
       const w = innerWidth
@@ -79,7 +94,7 @@ export function RendererWebGL({ count }: { count: number }) {
       camera.left = 0; camera.right = w; camera.top = 0; camera.bottom = h
       camera.updateProjectionMatrix()
       const field = createField(count, w, h, 1)
-      stateRef.current = { renderer, scene, camera, points, lines, field, w, h }
+      stateRef.current = { renderer, scene, camera, points, lines, wire, field, spin: stateRef.current?.spin ?? 0, w, h }
     }
     resize()
     addEventListener('resize', resize)
@@ -88,8 +103,10 @@ export function RendererWebGL({ count }: { count: number }) {
       removeEventListener('resize', resize)
       pointsGeo.dispose()
       linesGeo.dispose()
+      wireGeo.dispose()
       ;(points.material as THREE.Material).dispose()
       ;(lines.material as THREE.Material).dispose()
+      ;(wire.material as THREE.Material).dispose()
       renderer.dispose()
       renderer.domElement.remove()
       stateRef.current = null
@@ -116,6 +133,20 @@ export function RendererWebGL({ count }: { count: number }) {
     }
     s.lines.geometry.setDrawRange(0, links.length * 2)
     lpos.needsUpdate = true
+
+    // Centerpiece: rotate on the CPU (same math the 2D renderer uses) and write the
+    // projected edges as z=0 segments — consistent with how the field is drawn, and
+    // inside the ortho camera's near/far.
+    s.spin += WIRE_SPIN * dt
+    const scale = Math.min(s.w, s.h) * WIRE_SCALE
+    const pts = rotateProject(WIRE.vertices, WIRE_TILT, s.spin, scale, s.w / 2, s.h / 2)
+    const wpos = s.wire.geometry.getAttribute('position') as THREE.BufferAttribute
+    let wi = 0 // endpoint write index — not to be confused with s.w (width)
+    for (const [i, j] of WIRE.edges) {
+      wpos.setXYZ(wi++, pts[i].x, pts[i].y, 0)
+      wpos.setXYZ(wi++, pts[j].x, pts[j].y, 0)
+    }
+    wpos.needsUpdate = true
 
     s.renderer.render(s.scene, s.camera)
   }, true)
