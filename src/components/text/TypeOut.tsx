@@ -66,7 +66,7 @@ export function TypeOut({
     <Tag ref={ref as Ref<Element>} className={className}>
       <span className="sr-only">{text}</span>
       <span aria-hidden="true">
-        {text.slice(0, count)}
+        {done ? text : text.slice(0, count)}
         {!done && <span className="opacity-60">▍</span>}
       </span>
     </Tag>

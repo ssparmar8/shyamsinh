@@ -27,8 +27,8 @@ export function hexBipyramid(): { vertices: Vec3[]; edges: [number, number][] } 
 /**
  * Rotate each vertex around X (tilt) then Y (spin), drop z (orthographic — matches
  * RendererWebGL's ortho pixel-space camera), scale, and translate to (cx, cy).
- * Pure: same inputs always yield the same 2D points, which the deterministic decode
- * relies on for the scroll-driven case and which makes it testable here.
+ * Pure: same inputs always yield the same 2D points, so the WebGL and 2D renderers
+ * stay a visual match and it's unit-testable here.
  */
 export function rotateProject(
   vertices: Vec3[],
@@ -46,7 +46,7 @@ export function rotateProject(
     // rotate around X
     const y = v.y * cosX - v.z * sinX
     const z = v.y * sinX + v.z * cosX
-    // rotate around Y (z2 is discarded by the orthographic projection)
+    // rotate around Y; the resulting z is discarded by the orthographic projection
     const x = v.x * cosY + z * sinY
     return { x: cx + x * scale, y: cy + y * scale }
   })

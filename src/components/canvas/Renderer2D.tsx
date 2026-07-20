@@ -8,9 +8,9 @@ import { useRafLoop } from '@/lib/canvas/useRafLoop'
 const LINK_DIST = 120
 const INK = '#8d8d8d' // decorative only — never text, so the AA rule doesn't apply
 const WIRE = hexBipyramid()
-const WIRE_TILT = 0.4
-const WIRE_SPIN = 0.0002
-const WIRE_SCALE = 0.18
+const WIRE_TILT = 0.4 // fixed X tilt so the crystal reads as 3D
+const WIRE_SPIN = 0.0002 // rad/ms on Y ≈ one revolution / ~30s
+const WIRE_SCALE = 0.18 // of min(w, h)
 
 /**
  * The 2D-canvas constellation: the mandatory fallback, and a complete feature.
