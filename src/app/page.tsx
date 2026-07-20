@@ -6,6 +6,7 @@ import { Reveal } from '@/components/motion/Reveal'
 import { Identity } from '@/components/sections/Identity'
 import { Trajectory } from '@/components/sections/Trajectory'
 import { Systems } from '@/components/sections/Systems'
+import { Stack } from '@/components/sections/Stack'
 import { Telemetry } from '@/components/sections/Telemetry'
 import { ArchiveIndex } from '@/components/sections/ArchiveIndex'
 import { Uplink } from '@/components/sections/Uplink'
@@ -40,6 +41,9 @@ export default function Home() {
             {/* Systems reveals per-record internally (see Systems.tsx), so it is
                 not wrapped in a single section-level Reveal. */}
             <Systems />
+            <Reveal delayMs={125}>
+              <Stack />
+            </Reveal>
             <Reveal delayMs={150}>
               <Telemetry />
             </Reveal>

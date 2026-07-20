@@ -31,7 +31,14 @@ export default function ContactPage() {
           {IDENTITY.email}
         </a>
 
-        <div className={`${LABEL} mt-3`}>
+        <a
+          href={`tel:${IDENTITY.phone.replace(/\s/g, '')}`}
+          className={`${LABEL} mt-3 block w-fit underline-offset-4 hover:text-[var(--color-ink)] hover:underline`}
+        >
+          {IDENTITY.phone}
+        </a>
+
+        <div className={`${LABEL} mt-1`}>
           {IDENTITY.location.toUpperCase()} · REMOTE · FREELANCE CONTRACT
         </div>
 

@@ -6,6 +6,10 @@ export const IDENTITY = {
   location: 'Gujarat, India',
   locationCode: 'IN',
   email: 'parmarshyamsingh8@gmail.com',
+  // Supplied by Shyamsinh on the résumé. Display keeps the spaced grouping; the
+  // tel: href strips them (see Uplink/contact). Published deliberately — a
+  // freelance client wanting a call should get the number, not a form.
+  phone: '+91 88660 60908',
   /**
    * The source documents gave display names, not URLs, so early drafts of this list
    * were guesses — and the guesses were wrong. Upwork and LinkedIn both pointed at
