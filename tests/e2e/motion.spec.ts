@@ -48,7 +48,10 @@ test.describe('reduced motion gets full record content', () => {
 test.describe('the animated canvas', () => {
   test('is present on / (constellation + centerpiece)', async ({ page }) => {
     await enter(page)
-    expect(await page.locator('canvas').count()).toBeGreaterThan(0)
+    // The renderer is a dynamic(ssr:false) import and the device tier resolves a
+    // beat after hydration, so the <canvas> attaches asynchronously — wait for it
+    // rather than sampling the count immediately.
+    await expect(page.locator('canvas').first()).toBeAttached({ timeout: 5000 })
   })
 
   test('is absent under reduced motion', async ({ browser }) => {
