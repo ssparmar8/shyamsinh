@@ -18,7 +18,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function Systems() {
   return (
     <section id="systems" className="py-20 md:py-28">
-      <ScrambleTextAnimated as="h2" text="NODE: SYSTEMS" className={HEADING} />
+      <ScrambleTextAnimated as="h2" text="NODE: SYSTEMS" seed={4} className={HEADING} />
 
       <div className="mt-10 space-y-8">
         {getFeatured().map((s, i) => (

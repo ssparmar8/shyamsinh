@@ -12,7 +12,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function Uplink() {
   return (
     <section id="uplink" className="py-20 md:py-28">
-      <ScrambleTextAnimated as="h2" text="NODE: UPLINK" className={HEADING} />
+      <ScrambleTextAnimated as="h2" text="NODE: UPLINK" seed={7} className={HEADING} />
 
       {/*
         break-all and the tighter mobile tracking are load-bearing, not styling.

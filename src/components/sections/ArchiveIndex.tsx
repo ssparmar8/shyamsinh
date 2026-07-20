@@ -14,7 +14,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function ArchiveIndex() {
   return (
     <section id="archive" className="py-20 md:py-28">
-      <ScrambleTextAnimated as="h2" text="NODE: ARCHIVE INDEX" className={HEADING} />
+      <ScrambleTextAnimated as="h2" text="NODE: ARCHIVE INDEX" seed={6} className={HEADING} />
 
       <ul className="mt-10">
         {getArchive().map((s) => (

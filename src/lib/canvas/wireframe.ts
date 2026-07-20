@@ -2,6 +2,16 @@ export type Vec3 = { x: number; y: number; z: number }
 export type Vec2 = { x: number; y: number }
 
 /**
+ * Centerpiece tuning, shared by both renderers so the WebGL and 2D versions can't
+ * drift apart. The geometry is shared via `hexBipyramid`; these are the presentation
+ * knobs (spec §10 flags them as tune-against-the-running-site).
+ */
+export const WIRE_TILT = 0.4 // fixed X tilt so the crystal reads as 3D
+export const WIRE_SPIN = 0.0002 // rad/ms on Y ≈ one revolution / ~30s
+export const WIRE_SCALE = 0.18 // of min(w, h)
+export const WIRE_OPACITY = 0.28 // slightly above the constellation links so it anchors
+
+/**
  * A hexagonal bipyramid: a 6-vertex ring in the z=0 plane plus a top and bottom
  * apex. 8 vertices, 18 edges (ring 6 + top spokes 6 + bottom spokes 6). Sparse on
  * purpose — it is a background anchor, not the subject.

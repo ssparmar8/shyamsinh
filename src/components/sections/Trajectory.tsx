@@ -16,7 +16,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function Trajectory() {
   return (
     <section id="trajectory" className="py-20 md:py-28">
-      <ScrambleTextAnimated as="h2" text="NODE: TRAJECTORY" className={HEADING} />
+      <ScrambleTextAnimated as="h2" text="NODE: TRAJECTORY" seed={3} className={HEADING} />
 
       <ol className="mt-10 space-y-8 border-l border-[var(--color-border)] pl-6">
         {TRAJECTORY.map((node) => (

@@ -2,15 +2,12 @@
 
 import { useEffect, useRef } from 'react'
 import { createField, stepField, nearLinks, type Particle } from '@/lib/canvas/simulation'
-import { hexBipyramid, rotateProject } from '@/lib/canvas/wireframe'
+import { hexBipyramid, rotateProject, WIRE_TILT, WIRE_SPIN, WIRE_SCALE, WIRE_OPACITY } from '@/lib/canvas/wireframe'
 import { useRafLoop } from '@/lib/canvas/useRafLoop'
 
 const LINK_DIST = 120
 const INK = '#8d8d8d' // decorative only — never text, so the AA rule doesn't apply
 const WIRE = hexBipyramid()
-const WIRE_TILT = 0.4 // fixed X tilt so the crystal reads as 3D
-const WIRE_SPIN = 0.0002 // rad/ms on Y ≈ one revolution / ~30s
-const WIRE_SCALE = 0.18 // of min(w, h)
 
 /**
  * The 2D-canvas constellation: the mandatory fallback, and a complete feature.
@@ -82,7 +79,7 @@ export function Renderer2D({ count }: { count: number }) {
     spinRef.current += WIRE_SPIN * dt
     const scale = Math.min(w, h) * WIRE_SCALE
     const pts = rotateProject(WIRE.vertices, WIRE_TILT, spinRef.current, scale, w / 2, h / 2)
-    ctx.globalAlpha = 0.28
+    ctx.globalAlpha = WIRE_OPACITY
     ctx.strokeStyle = INK
     ctx.beginPath()
     for (const [i, j] of WIRE.edges) {

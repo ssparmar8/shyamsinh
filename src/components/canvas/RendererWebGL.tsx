@@ -3,15 +3,12 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { createField, stepField, nearLinks, type Particle } from '@/lib/canvas/simulation'
-import { hexBipyramid, rotateProject } from '@/lib/canvas/wireframe'
+import { hexBipyramid, rotateProject, WIRE_TILT, WIRE_SPIN, WIRE_SCALE, WIRE_OPACITY } from '@/lib/canvas/wireframe'
 import { useRafLoop } from '@/lib/canvas/useRafLoop'
 
 const LINK_DIST = 120
 const INK = new THREE.Color('#8d8d8d')
 const WIRE = hexBipyramid()
-const WIRE_TILT = 0.4 // fixed X tilt so the crystal reads as 3D
-const WIRE_SPIN = 0.0002 // rad/ms on Y ≈ one revolution / ~30s
-const WIRE_SCALE = 0.18 // of min(w, h)
 
 /**
  * The WebGL constellation, drawn with raw Three.js (no react-three-fiber — one
@@ -81,7 +78,7 @@ export function RendererWebGL({ count }: { count: number }) {
     wireGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(WIRE.edges.length * 6), 3))
     const wire = new THREE.LineSegments(
       wireGeo,
-      new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.28 }),
+      new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: WIRE_OPACITY }),
     )
 
     scene.add(points, lines, wire)

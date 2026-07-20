@@ -16,7 +16,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function Telemetry() {
   return (
     <section id="telemetry" className="py-20 md:py-28">
-      <ScrambleTextAnimated as="h2" text="NODE: TELEMETRY" className={HEADING} />
+      <ScrambleTextAnimated as="h2" text="NODE: TELEMETRY" seed={5} className={HEADING} />
       <div className={`${LABEL} mt-3`}>
         CLIENT WORK DELIVERED ACROSS {countClientRegions()} REGIONS
       </div>
