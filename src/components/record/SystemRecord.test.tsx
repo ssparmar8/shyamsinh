@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { SystemRecord } from './SystemRecord'
 import type { System } from '@/content/schema'
@@ -21,6 +21,22 @@ const live: System = {
 
 const priv: System = { ...live, slug: 'mof', name: 'MOF', status: 'PRIVATE', url: undefined }
 
+// Exercise the ANIMATED path: without these stubs jsdom has no matchMedia, so the
+// components fall back to reduced-motion (plain text) and the animated wiring goes
+// untested. matches:false = motion allowed; IO fires immediately so the decode/type
+// mounts its aria-hidden layers.
+beforeEach(() => {
+  vi.stubGlobal('matchMedia', vi.fn().mockImplementation((q: string) => ({
+    matches: false, media: q, addEventListener: vi.fn(), removeEventListener: vi.fn(),
+  })))
+  vi.stubGlobal('IntersectionObserver', class {
+    constructor(private cb: IntersectionObserverCallback) {}
+    observe() { this.cb([{ isIntersecting: true } as IntersectionObserverEntry], this as never) }
+    disconnect() {}
+    unobserve() {}
+  })
+})
+
 describe('SystemRecord', () => {
   it('renders name, domain, role, and year', () => {
     render(<SystemRecord system={live} index={0} />)
@@ -28,6 +44,17 @@ describe('SystemRecord', () => {
     expect(screen.getByText(/Voice AI/)).toBeInTheDocument()
     expect(screen.getByText(/led a small team/)).toBeInTheDocument()
     expect(screen.getByText(/2025/)).toBeInTheDocument()
+  })
+
+  it('keeps the name as accessible text even while it decodes', () => {
+    const { container } = render(<SystemRecord system={live} index={0} />)
+    expect(container.querySelector('.sr-only')?.textContent).toContain('AIVA Chat')
+    expect(container.querySelector('[aria-hidden="true"]')).toBeTruthy()
+  })
+
+  it('keeps the summary as accessible text while it types out', () => {
+    render(<SystemRecord system={live} index={0} />)
+    expect(screen.getByText('AI voice agents.')).toBeInTheDocument()
   })
 
   it('renders each stack entry', () => {
@@ -58,5 +85,16 @@ describe('SystemRecord', () => {
     const own: System = { ...live, engagement: 'Own product', role: 'Own product · built and operated under Woyce Tech' }
     render(<SystemRecord system={own} index={0} />)
     expect(screen.getByText(/Own product/)).toBeInTheDocument()
+  })
+
+  it('renders name, domain, and summary as plain text under reduced motion', () => {
+    vi.stubGlobal('matchMedia', vi.fn().mockImplementation((q: string) => ({
+      matches: true, media: q, addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    })))
+    const { container } = render(<SystemRecord system={live} index={0} />)
+    expect(container.querySelector('[aria-hidden="true"]')).toBeNull()
+    expect(screen.getByText('AIVA Chat')).toBeInTheDocument()
+    expect(screen.getByText(/Voice AI/)).toBeInTheDocument()
+    expect(screen.getByText('AI voice agents.')).toBeInTheDocument()
   })
 })
