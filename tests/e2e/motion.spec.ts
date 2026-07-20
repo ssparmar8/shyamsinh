@@ -1,0 +1,64 @@
+import { test, expect } from '@playwright/test'
+
+// Dismisses the gate + boot so the scroll experience is what a visitor sees.
+async function enter(page: import('@playwright/test').Page) {
+  await page.goto('/')
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+  await page.getByRole('button', { name: /OFF/i }).click()
+  await page.getByRole('button', { name: /SKIP/i }).click()
+  await expect(page.getByText(/LOADING/i)).toHaveCount(0)
+}
+
+test.describe('per-record reveal', () => {
+  test('a below-the-fold record starts hidden and reveals on scroll', async ({ page }) => {
+    await enter(page)
+
+    // The last featured record ("Health Wealth Safe") is well below the fold. Its
+    // Reveal wrapper is the article's parent; before scrolling it is opacity 0.
+    const wrapper = page.locator('div:has(> article:has-text("Health Wealth Safe"))').first()
+    const before = await wrapper.evaluate((el) => Number(getComputedStyle(el).opacity))
+    expect(before).toBeLessThan(0.5)
+
+    await page.getByRole('heading', { name: 'Health Wealth Safe' }).scrollIntoViewIfNeeded()
+    // ScrollTrigger fires at top 85% and the wrapper transitions to opacity 1.
+    await expect
+      .poll(async () => wrapper.evaluate((el) => Number(getComputedStyle(el).opacity)), { timeout: 3000 })
+      .toBeGreaterThan(0.9)
+  })
+})
+
+test.describe('reduced motion gets full record content', () => {
+  test.use({ contextOptions: { reducedMotion: 'reduce' } })
+
+  test('a record shows its full summary with no animated layer', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => localStorage.clear())
+    await page.reload()
+
+    // Full content present and, under reduced motion, no decode/type noise layer
+    // anywhere in the systems section.
+    const record = page.locator('article:has-text("AIVA Chat")')
+    await expect(record).toBeVisible()
+    await expect(record.getByText(/agents/i)).toBeVisible()
+    expect(await record.locator('[aria-hidden="true"]').count()).toBe(0)
+  })
+})
+
+test.describe('the animated canvas', () => {
+  test('is present on / (constellation + centerpiece)', async ({ page }) => {
+    await enter(page)
+    expect(await page.locator('canvas').count()).toBeGreaterThan(0)
+  })
+
+  test('is absent under reduced motion', async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' })
+    const page = await context.newPage()
+    await page.goto('/')
+    await page.evaluate(() => localStorage.clear())
+    await page.reload()
+    // Reduced motion → tier 'none' → Constellation renders nothing.
+    expect(await page.locator('canvas').count()).toBe(0)
+    await context.close()
+  })
+})
