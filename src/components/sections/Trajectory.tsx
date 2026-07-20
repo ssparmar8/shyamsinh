@@ -1,4 +1,5 @@
 import { TRAJECTORY, CONTINUITY } from '@/content/trajectory'
+import { ScrambleTextAnimated } from '@/components/text/ScrambleTextAnimated'
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]'
@@ -15,7 +16,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function Trajectory() {
   return (
     <section id="trajectory" className="py-20 md:py-28">
-      <h2 className={HEADING}>NODE: TRAJECTORY</h2>
+      <ScrambleTextAnimated as="h2" text="NODE: TRAJECTORY" className={HEADING} />
 
       <ol className="mt-10 space-y-8 border-l border-[var(--color-border)] pl-6">
         {TRAJECTORY.map((node) => (

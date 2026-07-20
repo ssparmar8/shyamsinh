@@ -1,4 +1,5 @@
 import { countClientRegions } from '@/content'
+import { ScrambleTextAnimated } from '@/components/text/ScrambleTextAnimated'
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]'
@@ -15,7 +16,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function Telemetry() {
   return (
     <section id="telemetry" className="py-20 md:py-28">
-      <h2 className={HEADING}>NODE: TELEMETRY</h2>
+      <ScrambleTextAnimated as="h2" text="NODE: TELEMETRY" className={HEADING} />
       <div className={`${LABEL} mt-3`}>
         CLIENT WORK DELIVERED ACROSS {countClientRegions()} REGIONS
       </div>

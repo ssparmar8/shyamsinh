@@ -1,4 +1,5 @@
 import { IDENTITY } from '@/content/identity'
+import { ScrambleTextAnimated } from '@/components/text/ScrambleTextAnimated'
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]'
@@ -11,7 +12,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function Uplink() {
   return (
     <section id="uplink" className="py-20 md:py-28">
-      <h2 className={HEADING}>NODE: UPLINK</h2>
+      <ScrambleTextAnimated as="h2" text="NODE: UPLINK" className={HEADING} />
 
       {/*
         break-all and the tighter mobile tracking are load-bearing, not styling.

@@ -15,7 +15,7 @@ const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--
 export function Identity() {
   return (
     <section id="identity" className="py-20 md:py-28">
-      <div className={LABEL}>{'// IDENTITY'}</div>
+      <ScrambleTextAnimated as="div" text="// IDENTITY" className={LABEL} seed={1} />
       {/*
         The animated decode, not the static ScrambleText. This is the site's
         signature effect and it was orphaned — built and unit-tested in Plan 2
@@ -35,10 +35,12 @@ export function Identity() {
         Uses countClientRegions(), NOT countRegions() — the latter includes his own
         base and would claim work delivered to India. See src/content/index.ts.
       */}
-      <div className={`${LABEL} mt-1`}>
-        {yearsExperience()} YRS · {countSystems()} SYSTEMS · {countSectors()} SECTORS ·{' '}
-        {countClientRegions()} CLIENT REGIONS
-      </div>
+      <ScrambleTextAnimated
+        as="div"
+        seed={2}
+        text={`${yearsExperience()} YRS · ${countSystems()} SYSTEMS · ${countSectors()} SECTORS · ${countClientRegions()} CLIENT REGIONS`}
+        className={`${LABEL} mt-1`}
+      />
       <div className={`${LABEL} mt-1`}>{IDENTITY.location.toUpperCase()} · REMOTE</div>
     </section>
   )

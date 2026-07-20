@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getArchive, recordNumber } from '@/content'
+import { ScrambleTextAnimated } from '@/components/text/ScrambleTextAnimated'
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]'
@@ -13,7 +14,7 @@ const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--c
 export function ArchiveIndex() {
   return (
     <section id="archive" className="py-20 md:py-28">
-      <h2 className={HEADING}>NODE: ARCHIVE INDEX</h2>
+      <ScrambleTextAnimated as="h2" text="NODE: ARCHIVE INDEX" className={HEADING} />
 
       <ul className="mt-10">
         {getArchive().map((s) => (
@@ -31,9 +32,11 @@ export function ArchiveIndex() {
               className="grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-3 border-b border-[var(--color-border)] py-3 hover:border-[var(--color-ink)] md:grid-cols-[2.5rem_1fr_1fr_auto]"
             >
               <span className={LABEL}>{String(recordNumber(s.slug)).padStart(2, '0')}</span>
-              <span className="font-mono text-sm tracking-[var(--tracking-hud)] text-[var(--color-ink)]">
-                {s.name}
-              </span>
+              <ScrambleTextAnimated
+                text={s.name}
+                seed={recordNumber(s.slug)}
+                className="font-mono text-sm tracking-[var(--tracking-hud)] text-[var(--color-ink)]"
+              />
               <span className={`${LABEL} hidden md:block`}>{s.domain}</span>
               <span className={LABEL}>{s.year} ▸</span>
             </Link>
