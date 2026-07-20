@@ -1,0 +1,53 @@
+export type Vec3 = { x: number; y: number; z: number }
+export type Vec2 = { x: number; y: number }
+
+/**
+ * A hexagonal bipyramid: a 6-vertex ring in the z=0 plane plus a top and bottom
+ * apex. 8 vertices, 18 edges (ring 6 + top spokes 6 + bottom spokes 6). Sparse on
+ * purpose — it is a background anchor, not the subject.
+ *
+ * Shared, like simulation.ts, so both renderers draw the identical shape and cannot
+ * drift. Pure and unit-testable — no THREE, no canvas.
+ */
+export function hexBipyramid(): { vertices: Vec3[]; edges: [number, number][] } {
+  const ring: Vec3[] = []
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i // 60° steps
+    ring.push({ x: Math.cos(a), y: Math.sin(a), z: 0 })
+  }
+  const vertices: Vec3[] = [...ring, { x: 0, y: 0, z: 1 }, { x: 0, y: 0, z: -1 }]
+  // indices: 0..5 ring, 6 top apex, 7 bottom apex
+  const edges: [number, number][] = []
+  for (let i = 0; i < 6; i++) edges.push([i, (i + 1) % 6]) // ring
+  for (let i = 0; i < 6; i++) edges.push([i, 6]) // to top
+  for (let i = 0; i < 6; i++) edges.push([i, 7]) // to bottom
+  return { vertices, edges }
+}
+
+/**
+ * Rotate each vertex around X (tilt) then Y (spin), drop z (orthographic — matches
+ * RendererWebGL's ortho pixel-space camera), scale, and translate to (cx, cy).
+ * Pure: same inputs always yield the same 2D points, which the deterministic decode
+ * relies on for the scroll-driven case and which makes it testable here.
+ */
+export function rotateProject(
+  vertices: Vec3[],
+  angleX: number,
+  angleY: number,
+  scale: number,
+  cx: number,
+  cy: number,
+): Vec2[] {
+  const cosX = Math.cos(angleX)
+  const sinX = Math.sin(angleX)
+  const cosY = Math.cos(angleY)
+  const sinY = Math.sin(angleY)
+  return vertices.map((v) => {
+    // rotate around X
+    const y = v.y * cosX - v.z * sinX
+    const z = v.y * sinX + v.z * cosX
+    // rotate around Y (z2 is discarded by the orthographic projection)
+    const x = v.x * cosY + z * sinY
+    return { x: cx + x * scale, y: cy + y * scale }
+  })
+}
