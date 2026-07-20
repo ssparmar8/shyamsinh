@@ -37,9 +37,9 @@ export default function Home() {
             <Reveal delayMs={50}>
               <Trajectory />
             </Reveal>
-            <Reveal delayMs={100}>
-              <Systems />
-            </Reveal>
+            {/* Systems reveals per-record internally (see Systems.tsx), so it is
+                not wrapped in a single section-level Reveal. */}
+            <Systems />
             <Reveal delayMs={150}>
               <Telemetry />
             </Reveal>
