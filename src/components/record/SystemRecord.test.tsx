@@ -97,4 +97,14 @@ describe('SystemRecord', () => {
     expect(screen.getByText(/Voice AI/)).toBeInTheDocument()
     expect(screen.getByText('AI voice agents.')).toBeInTheDocument()
   })
+
+  it('renders plain text with no animated layer when animate is false, even with motion allowed', () => {
+    // beforeEach allows motion (matches:false); animate={false} (the static detail
+    // route) must still force plain text — no decode/type layer at all.
+    const { container } = render(<SystemRecord system={live} index={0} animate={false} />)
+    expect(container.querySelector('[aria-hidden="true"]')).toBeNull()
+    expect(screen.getByText('AIVA Chat')).toBeInTheDocument()
+    expect(screen.getByText(/Voice AI/)).toBeInTheDocument()
+    expect(screen.getByText('AI voice agents.')).toBeInTheDocument()
+  })
 })

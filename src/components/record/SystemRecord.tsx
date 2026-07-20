@@ -3,30 +3,40 @@ import { ScrambleTextAnimated } from '@/components/text/ScrambleTextAnimated'
 import { TypeOut } from '@/components/text/TypeOut'
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
+const NAME = 'mt-3 font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]'
+const SUMMARY = 'mt-5 max-w-prose text-sm leading-relaxed text-[var(--color-ink)]'
 
 export function SystemRecord({
   system,
   index,
   seedBase = 0,
+  animate = true,
 }: {
   system: System
   index: number
   /** Varies the decode noise between records so adjacent ones don't shimmer in sync. */
   seedBase?: number
+  /**
+   * Whether the name/domain decode and the summary types out. The home scroll wants
+   * the motion; the addressable `/systems/[slug]` route is spec'd "fast, static"
+   * (design §8), so it renders this plain — the same end state reduced motion gets,
+   * but forced regardless of the visitor's motion preference.
+   */
+  animate?: boolean
 }) {
   const num = String(index + 1).padStart(2, '0')
   const host = system.url ? new URL(system.url).hostname.replace(/^www\./, '') : null
+  const domainText = `${system.domain} · ${system.region}`
 
   return (
     <article className="relative border border-[var(--color-border)] bg-[var(--color-panel)]/60 px-7 py-7 md:px-8">
       <div className={LABEL}>RECORD {num}</div>
 
-      <ScrambleTextAnimated
-        as="h2"
-        text={system.name}
-        seed={seedBase * 10 + 1}
-        className="mt-3 font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]"
-      />
+      {animate ? (
+        <ScrambleTextAnimated as="h2" text={system.name} seed={seedBase * 10 + 1} className={NAME} />
+      ) : (
+        <h2 className={NAME}>{system.name}</h2>
+      )}
 
       {/*
         A grid with a fixed label column, not flex rows: the whole conceit is a
@@ -37,7 +47,11 @@ export function SystemRecord({
       <dl className="mt-5 grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1">
         <dt className={LABEL}>DOMAIN</dt>
         <dd className={LABEL}>
-          <ScrambleTextAnimated text={`${system.domain} · ${system.region}`} seed={seedBase * 10 + 2} />
+          {animate ? (
+            <ScrambleTextAnimated text={domainText} seed={seedBase * 10 + 2} />
+          ) : (
+            domainText
+          )}
         </dd>
 
         <dt className={LABEL}>ROLE</dt>
@@ -47,11 +61,11 @@ export function SystemRecord({
         <dd className={LABEL}>{system.year}</dd>
       </dl>
 
-      <TypeOut
-        as="p"
-        text={system.summary}
-        className="mt-5 max-w-prose text-sm leading-relaxed text-[var(--color-ink)]"
-      />
+      {animate ? (
+        <TypeOut as="p" text={system.summary} className={SUMMARY} />
+      ) : (
+        <p className={SUMMARY}>{system.summary}</p>
+      )}
 
       <ul className="mt-5 flex flex-wrap gap-2">
         {system.stack.map((t) => (

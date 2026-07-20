@@ -41,7 +41,9 @@ export default async function SystemPage({
   return (
     <HudFrame label="ARCHIVE://">
       <main className="mx-auto max-w-3xl px-6 pt-24 pb-24">
-        <SystemRecord system={system} index={index === -1 ? 0 : index} />
+        {/* animate=false: this addressable route is spec'd "fast, static" (design §8);
+            the decode/typewriter belongs to the home scroll, not the one-link detail page. */}
+        <SystemRecord system={system} index={index === -1 ? 0 : index} animate={false} />
         <Link
           href="/archive"
           className="mt-8 inline-block font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)] hover:text-[var(--color-ink)]"
