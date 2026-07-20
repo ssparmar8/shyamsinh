@@ -91,6 +91,21 @@ export const SystemSchema = z
     url: z.url().optional(),
     status: z.enum(['LIVE', 'PRIVATE']),
     featured: z.boolean(),
+    /**
+     * Optional deep-dive, shown ONLY on the `/systems/[slug]` detail page — never on
+     * the home scroll. Problem → Decisions → Delivered is how the work reads in a
+     * client call: what was broken, the architecture calls made, what shipped. Written
+     * only where scope is confirmed accurate (spec §5) — notably YellowPad's `delivered`
+     * describes extraction + citation, NOT the "drafting" the source docs wrongly
+     * claimed and this file already corrected (see the note on that record).
+     */
+    caseStudy: z
+      .object({
+        problem: z.string().min(1),
+        decisions: z.string().min(1),
+        delivered: z.string().min(1),
+      })
+      .optional(),
   })
   .refine((s) => !(s.url && isPrivateHost(hostOf(s.url) ?? '')), {
     message: 'url points at a known-private host and must not be published',

@@ -23,6 +23,14 @@ export const SYSTEMS: System[] = [
     url: 'https://aivachat.io/',
     status: 'LIVE',
     featured: true,
+    caseStudy: {
+      problem:
+        'Every voice agent was a bespoke build. Deployment had to be productised so a new agent did not mean a new per-client rebuild.',
+      decisions:
+        'Tenant-isolated configuration over forked deployments. A provider abstraction across speech vendors, to avoid lock-in and allow cost-driven routing. Recording and transcript capture as a platform primitive, not a per-client feature — analytics and dispute resolution are universal needs.',
+      delivered:
+        'A self-serve platform for creating and deploying voice agents and embeddable chat widgets across web, phone, and apps — with full call recordings and conversation analytics, in 12+ languages.',
+    },
   },
   {
     slug: 'health-wealth-safe',
@@ -39,6 +47,14 @@ export const SYSTEMS: System[] = [
     url: 'https://www.healthwealthsafe.com/',
     status: 'LIVE',
     featured: true,
+    caseStudy: {
+      problem:
+        'Patient records, billing, and communication were fragmented across care managers, clinicians, and patients.',
+      decisions:
+        'Consolidate EMR, billing, and engagement into one data model rather than integrating three systems — accepting a heavier build for a single source of truth. Real-time chat and video as first-class infrastructure, not a bolt-on. Role-scoped access boundaries designed before feature work, to keep PHI exposure minimal by default.',
+      delivered:
+        'A platform with EMR, billing, care-management dashboards, document storage, and video consultations, spanning web plus separate patient and staff applications.',
+    },
   },
   {
     slug: 'vetwise',
@@ -76,6 +92,19 @@ export const SYSTEMS: System[] = [
     url: 'https://www.yellowpad.ai/',
     status: 'LIVE',
     featured: true,
+    // `delivered` deliberately describes extraction + citation, NOT drafting. The
+    // résumé's case study for this project is titled "Legal Drafting" and claims
+    // agreements were drafted — the same stale claim the summary above was corrected
+    // away from. The Problem/Decisions are accurate and kept; the outcome is worded
+    // to the live product a client can actually open.
+    caseStudy: {
+      problem:
+        "The client's existing AI returned a different answer to the same question each time — unusable where a wrong answer carries legal liability.",
+      decisions:
+        'Extract document data into a structured store and query that, rather than regenerating from the model on each request — trading flexibility for determinism, because auditability was the binding constraint. Passage-level citation, fixed up front, since retrofitting it means reprocessing the whole corpus.',
+      delivered:
+        'A document-intelligence layer that returns consistent, cited, verifiable answers from enterprise documents — every answer traceable back to its source passage.',
+    },
   },
   {
     slug: 'quickhub',
@@ -142,6 +171,14 @@ export const SYSTEMS: System[] = [
     // No url — client UAT environment behind a login. See spec §5.2.
     status: 'PRIVATE',
     featured: false,
+    caseStudy: {
+      problem:
+        'The clinic was losing bookings to voicemail and could not answer at volume. The agent had to be trustworthy enough to act on a live clinical calendar.',
+      decisions:
+        'A realtime speech model over a cascaded STT→LLM→TTS chain, to hold latency inside conversational tolerance. Confidence-threshold handoff to a human rather than best-effort completion. Write-scope limited to appointments only, so a model error can never touch a clinical record. Full transcript retention for audit.',
+      delivered:
+        'A voice agent that books, reschedules, and cancels appointments, with call logs, transcription, a configurable agent voice, and Twilio number provisioning.',
+    },
   },
   {
     slug: 'hcomb',
