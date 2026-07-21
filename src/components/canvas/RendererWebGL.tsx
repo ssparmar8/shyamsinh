@@ -3,7 +3,21 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { createField, stepField, nearLinks, type Particle } from '@/lib/canvas/simulation'
-import { hexBipyramid, rotateProject, WIRE_TILT, WIRE_SPIN, WIRE_SCALE, WIRE_OPACITY } from '@/lib/canvas/wireframe'
+import {
+  hexBipyramid,
+  rotateProject,
+  WIRE_TILT,
+  WIRE_SPIN,
+  WIRE_SCALE,
+  WIRE_OPACITY,
+  WIRE_SCROLL_TURN,
+  WIRE_ZOOM,
+  WIRE_MOUSE_YAW,
+  WIRE_MOUSE_PITCH,
+  FIELD_PARALLAX,
+  POINTER_EASE,
+} from '@/lib/canvas/wireframe'
+import { pointerTarget, scrollProgress } from '@/lib/canvas/pointer'
 import { useRafLoop } from '@/lib/canvas/useRafLoop'
 
 const LINK_DIST = 120
@@ -32,6 +46,8 @@ export function RendererWebGL({ count }: { count: number }) {
     wire: THREE.LineSegments
     field: Particle[]
     spin: number
+    px: number
+    py: number
     w: number
     h: number
   } | null>(null)
@@ -91,7 +107,13 @@ export function RendererWebGL({ count }: { count: number }) {
       camera.left = 0; camera.right = w; camera.top = 0; camera.bottom = h
       camera.updateProjectionMatrix()
       const field = createField(count, w, h, 1)
-      stateRef.current = { renderer, scene, camera, points, lines, wire, field, spin: stateRef.current?.spin ?? 0, w, h }
+      stateRef.current = {
+        renderer, scene, camera, points, lines, wire, field,
+        spin: stateRef.current?.spin ?? 0,
+        px: stateRef.current?.px ?? 0,
+        py: stateRef.current?.py ?? 0,
+        w, h,
+      }
     }
     resize()
     addEventListener('resize', resize)
@@ -113,11 +135,19 @@ export function RendererWebGL({ count }: { count: number }) {
   useRafLoop((dt) => {
     const s = stateRef.current
     if (!s) return
+
+    // Ease the pointer toward its target, then parallax the whole field against it.
+    const tgt = pointerTarget()
+    s.px += (tgt.x - s.px) * POINTER_EASE
+    s.py += (tgt.y - s.py) * POINTER_EASE
+    const ox = s.px * FIELD_PARALLAX
+    const oy = s.py * FIELD_PARALLAX
+
     stepField(s.field, s.w, s.h, dt)
 
     const pos = s.points.geometry.getAttribute('position') as THREE.BufferAttribute
     for (let i = 0; i < s.field.length; i++) {
-      pos.setXYZ(i, s.field[i].x, s.field[i].y, 0)
+      pos.setXYZ(i, s.field[i].x + ox, s.field[i].y + oy, 0)
     }
     pos.needsUpdate = true
 
@@ -125,8 +155,8 @@ export function RendererWebGL({ count }: { count: number }) {
     const lpos = s.lines.geometry.getAttribute('position') as THREE.BufferAttribute
     let k = 0
     for (const [i, j] of links) {
-      lpos.setXYZ(k++, s.field[i].x, s.field[i].y, 0)
-      lpos.setXYZ(k++, s.field[j].x, s.field[j].y, 0)
+      lpos.setXYZ(k++, s.field[i].x + ox, s.field[i].y + oy, 0)
+      lpos.setXYZ(k++, s.field[j].x + ox, s.field[j].y + oy, 0)
     }
     s.lines.geometry.setDrawRange(0, links.length * 2)
     lpos.needsUpdate = true
@@ -135,8 +165,11 @@ export function RendererWebGL({ count }: { count: number }) {
     // projected edges as z=0 segments — consistent with how the field is drawn, and
     // inside the ortho camera's near/far.
     s.spin += WIRE_SPIN * dt
-    const scale = Math.min(s.w, s.h) * WIRE_SCALE
-    const pts = rotateProject(WIRE.vertices, WIRE_TILT, s.spin, scale, s.w / 2, s.h / 2)
+    const sc = scrollProgress()
+    const angleY = s.spin + sc * WIRE_SCROLL_TURN + s.px * WIRE_MOUSE_YAW
+    const angleX = WIRE_TILT + s.py * WIRE_MOUSE_PITCH
+    const scale = Math.min(s.w, s.h) * WIRE_SCALE * (1 + sc * WIRE_ZOOM)
+    const pts = rotateProject(WIRE.vertices, angleX, angleY, scale, s.w / 2, s.h / 2)
     const wpos = s.wire.geometry.getAttribute('position') as THREE.BufferAttribute
     let wi = 0 // endpoint write index — not to be confused with s.w (width)
     for (const [i, j] of WIRE.edges) {

@@ -2,7 +2,21 @@
 
 import { useEffect, useRef } from 'react'
 import { createField, stepField, nearLinks, type Particle } from '@/lib/canvas/simulation'
-import { hexBipyramid, rotateProject, WIRE_TILT, WIRE_SPIN, WIRE_SCALE, WIRE_OPACITY } from '@/lib/canvas/wireframe'
+import {
+  hexBipyramid,
+  rotateProject,
+  WIRE_TILT,
+  WIRE_SPIN,
+  WIRE_SCALE,
+  WIRE_OPACITY,
+  WIRE_SCROLL_TURN,
+  WIRE_ZOOM,
+  WIRE_MOUSE_YAW,
+  WIRE_MOUSE_PITCH,
+  FIELD_PARALLAX,
+  POINTER_EASE,
+} from '@/lib/canvas/wireframe'
+import { pointerTarget, scrollProgress } from '@/lib/canvas/pointer'
 import { useRafLoop } from '@/lib/canvas/useRafLoop'
 
 const LINK_DIST = 120
@@ -21,6 +35,7 @@ export function Renderer2D({ count }: { count: number }) {
   const fieldRef = useRef<Particle[]>([])
   const sizeRef = useRef({ w: 0, h: 0 })
   const spinRef = useRef(0)
+  const pointerRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -50,9 +65,20 @@ export function Renderer2D({ count }: { count: number }) {
     if (!ctx) return
     const { w, h } = sizeRef.current
     const field = fieldRef.current
+
+    // Ease the pointer toward its target; parallax the field against it.
+    const tgt = pointerTarget()
+    const pt = pointerRef.current
+    pt.x += (tgt.x - pt.x) * POINTER_EASE
+    pt.y += (tgt.y - pt.y) * POINTER_EASE
+    const ox = pt.x * FIELD_PARALLAX
+    const oy = pt.y * FIELD_PARALLAX
+
     stepField(field, w, h, dt)
 
     ctx.clearRect(0, 0, w, h)
+    ctx.save()
+    ctx.translate(ox, oy)
     ctx.strokeStyle = INK
     for (const [i, j] of nearLinks(field, LINK_DIST)) {
       const a = field[i]
@@ -74,11 +100,16 @@ export function Renderer2D({ count }: { count: number }) {
       ctx.fill()
     }
     ctx.globalAlpha = 1
+    ctx.restore()
 
-    // Centerpiece: same geometry + projection as the WebGL renderer.
+    // Centerpiece: same geometry + projection as the WebGL renderer, driven by scroll
+    // progress and the eased pointer (which the field does not share — different depths).
     spinRef.current += WIRE_SPIN * dt
-    const scale = Math.min(w, h) * WIRE_SCALE
-    const pts = rotateProject(WIRE.vertices, WIRE_TILT, spinRef.current, scale, w / 2, h / 2)
+    const sc = scrollProgress()
+    const angleY = spinRef.current + sc * WIRE_SCROLL_TURN + pt.x * WIRE_MOUSE_YAW
+    const angleX = WIRE_TILT + pt.y * WIRE_MOUSE_PITCH
+    const scale = Math.min(w, h) * WIRE_SCALE * (1 + sc * WIRE_ZOOM)
+    const pts = rotateProject(WIRE.vertices, angleX, angleY, scale, w / 2, h / 2)
     ctx.globalAlpha = WIRE_OPACITY
     ctx.strokeStyle = INK
     ctx.beginPath()
