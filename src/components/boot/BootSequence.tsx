@@ -49,7 +49,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-label="Loading"
-      className="hud-grid fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--color-bg)]"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--color-bg)]"
     >
       <div
         className="font-mono text-sm tracking-[var(--tracking-wide)] text-[var(--color-ink)]"

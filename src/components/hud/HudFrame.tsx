@@ -7,8 +7,8 @@ type Props = {
 }
 
 /**
- * The persistent chrome: grid, corner brackets, and a contact link reachable at
- * every scroll depth (spec §9.07).
+ * The persistent chrome: corner brackets and a contact link reachable at every
+ * scroll depth (spec §9.07).
  *
  * The chrome is `fixed`, deliberately. An earlier version positioned it `absolute`
  * inside a `min-h-dvh` box — which is only a *floor*, so the box grows to content
@@ -18,17 +18,14 @@ type Props = {
  * scrolled away. It looked correct only because every route was shorter than one
  * viewport. Plan 2's ~13,000px homepage would have exposed it immediately.
  *
- * Layering: grid at z-0 behind everything, content at z-10, decorative brackets at
- * z-20 framing the viewport, interactive chrome at z-30 on top. The two decorative
- * layers are `pointer-events-none` so they never intercept a click meant for
- * content — a full-viewport fixed overlay that swallows clicks is the classic way
- * this pattern goes wrong.
+ * Layering: content at z-10, decorative brackets at z-20 framing the viewport,
+ * interactive chrome at z-30 on top. The brackets layer is `pointer-events-none`
+ * so it never intercepts a click meant for content — a full-viewport fixed overlay
+ * that swallows clicks is the classic way this pattern goes wrong.
  */
 export function HudFrame({ children, label }: Props) {
   return (
     <div className="relative min-h-dvh w-full">
-      <div aria-hidden="true" className="hud-grid pointer-events-none fixed inset-0 z-0" />
-
       {/* Brackets are `absolute` within this fixed box, so they frame the viewport. */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-20">
         <CornerBracket corner="tl" />

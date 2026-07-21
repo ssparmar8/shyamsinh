@@ -56,14 +56,6 @@ body {
   color: var(--color-ink);
 }
 
-/* The 26px archive grid — spec §10. */
-.hud-grid {
-  background-image:
-    linear-gradient(var(--color-hair) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-hair) 1px, transparent 1px);
-  background-size: 26px 26px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

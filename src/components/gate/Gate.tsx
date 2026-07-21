@@ -26,7 +26,7 @@ export function Gate({ onChoose }: { onChoose: (audioOn: boolean) => void }) {
       role="dialog"
       aria-modal="true"
       aria-label="Audio output routing"
-      className="hud-grid fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--color-bg)]"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--color-bg)]"
     >
       <div className={LABEL}>{'// AUDIO · RX'}</div>
       <h2 className="mt-3 font-mono text-sm tracking-[var(--tracking-wide)] text-[var(--color-ink)] md:text-base">
