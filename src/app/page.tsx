@@ -2,7 +2,7 @@ import { Constellation } from '@/components/canvas/Constellation'
 import { EntryOverlay } from '@/components/boot/EntryOverlay'
 import { SmoothScroll } from '@/components/scroll/SmoothScroll'
 import { HudFrame } from '@/components/hud/HudFrame'
-import { Reveal } from '@/components/motion/Reveal'
+import { Scene } from '@/components/motion/Scene'
 import { Identity } from '@/components/sections/Identity'
 import { Trajectory } from '@/components/sections/Trajectory'
 import { Systems } from '@/components/sections/Systems'
@@ -19,40 +19,31 @@ export default function Home() {
       <EntryOverlay>
         <HudFrame label="ARCHIVE://">
           <main className="mx-auto max-w-3xl px-6">
-            {/*
-              Every beat is server-rendered, always — Reveal only wraps
-              already-rendered content with opacity/transform styling as a
-              client-side enhancement; it never gates it (see Reveal.tsx).
-              Identity is above the fold, so its ScrollTrigger fires on the
-              same initial refresh that creates it, not on a scroll that can
-              never happen — its own hero decode (ScrambleTextAnimated) is
-              untouched by this, since Reveal only ever animates the section
-              as a whole, never the name text inside it. The small
-              incremental delayMs is a subtle stagger for the case where more
-              than one section's trigger fires at once (e.g. a keyboard End
-              jump to the bottom), not a mechanism content depends on.
-            */}
-            <Reveal delayMs={0}>
+            {/* Each beat is a Scene: pinned + scroll-scrubbed on pointer/wide, one-shot
+                reveal on touch, full static content under reduced motion (see Scene.tsx).
+                Per-beat `length` (viewport multiples) paces how much scroll each holds —
+                Systems is longest so its six records assemble in sequence across the pin. */}
+            <Scene length={0.8}>
               <Identity />
-            </Reveal>
-            <Reveal delayMs={50}>
+            </Scene>
+            <Scene length={1}>
               <Trajectory />
-            </Reveal>
-            {/* Systems reveals per-record internally (see Systems.tsx), so it is
-                not wrapped in a single section-level Reveal. */}
-            <Systems />
-            <Reveal delayMs={125}>
+            </Scene>
+            <Scene length={2.2}>
+              <Systems />
+            </Scene>
+            <Scene length={0.7}>
               <Stack />
-            </Reveal>
-            <Reveal delayMs={150}>
+            </Scene>
+            <Scene length={1.2}>
               <Telemetry />
-            </Reveal>
-            <Reveal delayMs={200}>
+            </Scene>
+            <Scene length={1}>
               <ArchiveIndex />
-            </Reveal>
-            <Reveal delayMs={250}>
+            </Scene>
+            <Scene length={0.8}>
               <Uplink />
-            </Reveal>
+            </Scene>
           </main>
         </HudFrame>
       </EntryOverlay>
