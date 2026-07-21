@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react'
 import { Systems } from './Systems'
 import { getFeatured } from '@/content'
 
-// Systems now wraps each record in <Reveal>, which imports gsap + ScrollTrigger.
-// jsdom can't drive a real ScrollTrigger, so mock it (same shape as Reveal.test.tsx).
+// SystemRecord's names use ScrambleTextAnimated; the Rise wrappers render plain (no Scene
+// context in this isolated render), so no gsap is pulled in. Mock kept minimal for safety.
 vi.mock('gsap', () => ({ gsap: { registerPlugin: vi.fn() } }))
 vi.mock('gsap/ScrollTrigger', () => ({
   ScrollTrigger: { create: vi.fn(() => ({ kill: vi.fn() })), update: vi.fn() },
@@ -36,10 +36,11 @@ describe('Systems', () => {
     }
   })
 
-  it('renders the systems heading as a decode layer, keeping the real text accessible', () => {
+  it('renders the systems heading (a DecodeLine, plain text outside a Scene)', () => {
     render(<Systems />)
-    // After the swap the heading is ScrambleTextAnimated: the real text lives in an
-    // sr-only span. Against the old plain <h2> this element has no sr-only class.
-    expect(screen.getByText('NODE: SYSTEMS')).toHaveClass('sr-only')
+    // Rendered in isolation there's no SceneContext, so DecodeLine renders one plain heading
+    // node — the real text is present and accessible (the scrubbed noise layer only exists
+    // inside a scrub Scene, verified in e2e).
+    expect(screen.getByRole('heading', { name: 'NODE: SYSTEMS' })).toBeInTheDocument()
   })
 })
