@@ -14,7 +14,11 @@ describe('Telemetry', () => {
     // Sanity check the two counts really do differ in this dataset, so this test
     // cannot pass vacuously.
     expect(countClientRegions()).not.toBe(countRegions())
-    expect(screen.getByText(new RegExp(String(countClientRegions())))).toBeInTheDocument()
+    // Match the claim line specifically, not a bare digit — the map's coordinate
+    // readouts (e.g. "22.30°N") also contain digits and would make a loose match ambiguous.
+    expect(
+      screen.getByText(new RegExp(`ACROSS ${countClientRegions()} REGIONS`, 'i')),
+    ).toBeInTheDocument()
     expect(screen.queryByText(/4 REGIONS/i)).not.toBeInTheDocument()
   })
 })

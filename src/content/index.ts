@@ -1,6 +1,7 @@
 import { SYSTEMS } from './systems'
 import { IDENTITY } from './identity'
 import type { System } from './schema'
+import { REGION_GEO, HOME_REGION, type Region } from './telemetry'
 
 export const getFeatured = (): System[] =>
   SYSTEMS.filter((s) => s.featured).sort((a, b) => b.year - a.year)
@@ -61,6 +62,25 @@ export const countClientRegions = (): number => new Set(clientWork().map((s) => 
 /** How many of the systems were his own products rather than client contracts. */
 export const countOwnProducts = (): number =>
   SYSTEMS.filter((s) => s.engagement === 'Own product').length
+
+export type TelemetryNode = { region: Region; lat: number; lon: number; label: string; count: number }
+
+/**
+ * Nodes for the telemetry map: the home node (where the work is done from) plus one
+ * node per distinct CLIENT region, each carrying the count of systems delivered there.
+ * Derived from clientWork(), so the map can never draw a region with no client work
+ * behind it — the same honesty rule countClientRegions() enforces for the headline.
+ */
+export const getTelemetryNodes = (): { home: TelemetryNode; clients: TelemetryNode[] } => {
+  const work = clientWork()
+  const regions = [...new Set(work.map((s) => s.region))].filter((r) => r !== HOME_REGION)
+  const clients = regions.map((r) => ({
+    region: r,
+    ...REGION_GEO[r],
+    count: work.filter((s) => s.region === r).length,
+  }))
+  return { home: { region: HOME_REGION, ...REGION_GEO[HOME_REGION], count: 0 }, clients }
+}
 
 export { SYSTEMS }
 export type { System }
