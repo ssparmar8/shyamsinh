@@ -336,6 +336,15 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
+> **Execution note (2026-07-21):** browser verification of M1 showed a single pin-from-`top`
+> scrub leaves the hero blank at scroll 0 and makes below-fold beats rise as blank blocks
+> before pinning. Scene was refined to a **two-phase** choreography: an ASSEMBLE trigger
+> scrubbed over `top bottom → top top` (content builds on entrance; the first beat's start is
+> already passed at load, so the hero renders visible), plus a separate HOLD trigger that pins
+> at `top top` for `length` viewports. Content sits in an inner wrapper, the pin is on the
+> outer, so pin (`position:fixed`) and content transforms don't fight. The layer/registration
+> API below is unchanged; see the committed `Scene.tsx` for the final shape.
+
 ## Task 4: `Scene` component (three modes; scrub pins + default timeline)
 
 Depends on Task 5's `buildSceneTimeline` for the scrub timeline — build the context + timeline module first, then Scene.
