@@ -54,14 +54,22 @@ test.describe('the animated canvas', () => {
     await expect(page.locator('canvas').first()).toBeAttached({ timeout: 5000 })
   })
 
-  test('is absent under reduced motion', async ({ browser }) => {
+  test('the animated constellation is absent under reduced motion', async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: 'reduce' })
     const page = await context.newPage()
     await page.goto('/')
     await page.evaluate(() => localStorage.clear())
     await page.reload()
-    // Reduced motion → tier 'none' → Constellation renders nothing.
-    expect(await page.locator('canvas').count()).toBe(0)
+    // Reduced motion → tier 'none' → the fixed, full-screen constellation renders
+    // nothing. The telemetry map IS a canvas, but it's static content (drawn once, no
+    // rAF loop) and a block element, so it's intentionally still present — assert only
+    // that no FIXED (i.e. animated-background) canvas exists.
+    const fixedCanvases = await page.evaluate(
+      () =>
+        [...document.querySelectorAll('canvas')].filter((c) => getComputedStyle(c).position === 'fixed')
+          .length,
+    )
+    expect(fixedCanvases).toBe(0)
     await context.close()
   })
 })
