@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { CornerBracket } from './CornerBracket'
+import { HudReadout } from './HudReadout'
 
 type Props = {
   children: React.ReactNode
@@ -7,8 +8,8 @@ type Props = {
 }
 
 /**
- * The persistent chrome: corner brackets and a contact link reachable at every
- * scroll depth (spec §9.07).
+ * The persistent chrome: corner brackets, a live terminal readout, and a contact
+ * link reachable at every scroll depth (spec §9.07).
  *
  * The chrome is `fixed`, deliberately. An earlier version positioned it `absolute`
  * inside a `min-h-dvh` box — which is only a *floor*, so the box grows to content
@@ -46,6 +47,8 @@ export function HudFrame({ children, label }: Props) {
       >
         ◂ UPLINK
       </Link>
+
+      <HudReadout />
 
       <div className="relative z-10">{children}</div>
     </div>
