@@ -29,13 +29,6 @@ export function useLenis() {
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true })
     lenis.on('scroll', ScrollTrigger.update)
 
-    // Dev/test-only handle so e2e can drive scroll through the real Lenis→ScrollTrigger
-    // pipeline (synthetic wheel events and window.scrollTo both bypass it). Stripped from
-    // production by the NODE_ENV guard.
-    if (process.env.NODE_ENV !== 'production') {
-      ;(window as unknown as { __lenis?: Lenis }).__lenis = lenis
-    }
-
     const onTick = (time: number) => lenis.raf(time * 1000) // ticker seconds → Lenis ms
     gsap.ticker.add(onTick)
     gsap.ticker.lagSmoothing(0)
