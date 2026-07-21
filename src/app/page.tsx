@@ -21,27 +21,29 @@ export default function Home() {
           <main className="mx-auto max-w-3xl px-6">
             {/* Each beat is a Scene: pinned + scroll-scrubbed on pointer/wide, one-shot
                 reveal on touch, full static content under reduced motion (see Scene.tsx).
-                Per-beat `length` (viewport multiples) paces how much scroll each holds —
-                Systems is longest so its six records assemble in sequence across the pin. */}
-            <Scene length={0.8}>
+                The star is the scrubbed assemble-on-entrance; `length` is a SHORT pin-hold
+                (viewport multiples) that punctuates each beat. Tall beats (Systems,
+                ArchiveIndex) get a brief hold, then scroll through with their per-item decode
+                — a long hold would freeze the top records while the rest wait below. */}
+            <Scene length={0.5}>
               <Identity />
             </Scene>
-            <Scene length={1}>
+            <Scene length={0.4}>
               <Trajectory />
             </Scene>
-            <Scene length={2.2}>
+            <Scene length={0.5}>
               <Systems />
             </Scene>
-            <Scene length={0.7}>
+            <Scene length={0.4}>
               <Stack />
             </Scene>
-            <Scene length={1.2}>
+            <Scene length={0.5}>
               <Telemetry />
             </Scene>
-            <Scene length={1}>
+            <Scene length={0.4}>
               <ArchiveIndex />
             </Scene>
-            <Scene length={0.8}>
+            <Scene length={0.5}>
               <Uplink />
             </Scene>
           </main>

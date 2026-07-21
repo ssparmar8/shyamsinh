@@ -12,7 +12,7 @@ export const WIRE_SCALE = 0.18 // of min(w, h)
 export const WIRE_OPACITY = 0.28 // slightly above the constellation links so it anchors
 
 // Scroll- and pointer-driven feel, shared so the WebGL and 2D renderers can't drift.
-export const WIRE_SCROLL_TURN = Math.PI * 2 // extra Y rotation across the whole scroll
+export const WIRE_SCROLL_TURN = Math.PI * 6 // ~3 turns across the (much taller) pinned page
 export const WIRE_ZOOM = 0.22 // scale gain from top → bottom of the scroll
 export const WIRE_MOUSE_YAW = 0.3 // rad the crystal yaws toward the cursor (x)
 export const WIRE_MOUSE_PITCH = 0.25 // rad it pitches toward the cursor (y)
