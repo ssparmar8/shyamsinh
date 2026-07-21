@@ -59,11 +59,11 @@ body {
 /* HUD corner traces draw themselves on load; the reduced-motion rule below makes
  * that near-instant, so a reduced-motion visitor just sees them already present. */
 @keyframes hud-trace {
-  from { stroke-dashoffset: 120; }
+  from { stroke-dashoffset: 160; }
   to { stroke-dashoffset: 0; }
 }
 .hud-trace {
-  stroke-dasharray: 120;
+  stroke-dasharray: 160;
   animation: hud-trace 1.4s ease-out both;
 }
 

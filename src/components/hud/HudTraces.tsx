@@ -20,15 +20,15 @@ export function HudTraces() {
       {CORNERS.map((style, i) => (
         <svg
           key={i}
-          width="84"
-          height="44"
-          viewBox="0 0 84 44"
+          width="112"
+          height="62"
+          viewBox="0 0 112 62"
           fill="none"
           className="absolute text-[var(--color-ghost)]"
           style={style}
         >
-          <path className="hud-trace" d="M2 8 H64 M64 8 V38" stroke="currentColor" strokeWidth="1" strokeOpacity="0.45" />
-          <circle cx="64" cy="8" r="2.2" fill="currentColor" fillOpacity="0.55" />
+          <path className="hud-trace" d="M2 12 H90 M90 12 V52" stroke="currentColor" strokeWidth="1.25" strokeOpacity="0.75" />
+          <circle cx="90" cy="12" r="3" fill="currentColor" fillOpacity="0.9" />
         </svg>
       ))}
     </div>
