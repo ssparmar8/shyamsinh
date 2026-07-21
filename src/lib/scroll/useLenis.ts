@@ -2,33 +2,46 @@
 
 import { useEffect } from 'react'
 import Lenis from 'lenis'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { usePrefersReducedMotion } from '@/lib/motion/usePrefersReducedMotion'
 
+// Registered once, SSR-guarded (module is 'use client' but Next still evaluates it on
+// the server while rendering the page that hydrates it). registerPlugin is idempotent.
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
 /**
- * Smooth scroll, at `/` only.
+ * Smooth scroll on `/` only, disabled under reduced motion.
  *
- * Disabled entirely under reduced motion — smooth scrolling IS motion, and
- * hijacking the scroll of someone who asked for none is exactly the kind of
- * "accessible in name only" that spec §13 rejects.
- *
- * Lenis is imported statically here but this hook is only mounted from `/`, so
- * the static routes never pull it into their bundle. Verify that claim with the
- * network check in Step 4 rather than trusting it.
+ * Drives Lenis from GSAP's ticker (not a standalone rAF) and updates ScrollTrigger on
+ * every Lenis scroll, so pinned/scrubbed Scenes track the smoothed scroll frame-for-frame.
+ * Lenis animates the real window scroll (no transform wrapper), so ScrollTrigger's default
+ * `window` scroller and `pinType: 'fixed'` are correct — no scrollerProxy needed.
  */
 export function useLenis() {
   const reduced = usePrefersReducedMotion()
 
   useEffect(() => {
     if (reduced) return
+
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true })
-    let raf = 0
-    const tick = (time: number) => {
-      lenis.raf(time)
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
+    lenis.on('scroll', ScrollTrigger.update)
+
+    const onTick = (time: number) => lenis.raf(time * 1000) // ticker seconds → Lenis ms
+    gsap.ticker.add(onTick)
+    gsap.ticker.lagSmoothing(0)
+
+    // Scenes create their pins on mount, but the boot overlay locks body scroll while
+    // it's up (EntryOverlay sets overflow:hidden). Once it dismisses and restores
+    // overflow, re-measure so pin start/end land against the real layout.
+    const refresh = () => ScrollTrigger.refresh()
+    addEventListener('entry:done', refresh)
+
     return () => {
-      cancelAnimationFrame(raf)
+      removeEventListener('entry:done', refresh)
+      gsap.ticker.remove(onTick)
       lenis.destroy()
     }
   }, [reduced])

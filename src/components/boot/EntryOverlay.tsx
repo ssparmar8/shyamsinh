@@ -76,6 +76,15 @@ export function EntryOverlay({ children }: { children: React.ReactNode }) {
     }
   }, [overlayUp])
 
+  // Signal the scroll layer (useLenis) to re-measure once the overlay is gone and body
+  // overflow is restored — pins created during boot need a refresh against real layout.
+  // Defined AFTER the overflow effect so overflow is restored before the refresh fires.
+  useEffect(() => {
+    if (phase === 'done' && typeof window !== 'undefined') {
+      dispatchEvent(new Event('entry:done'))
+    }
+  }, [phase])
+
   return (
     <>
       {/*
