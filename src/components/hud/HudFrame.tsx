@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CornerBracket } from './CornerBracket'
 import { HudReadout } from './HudReadout'
+import { HudTraces } from './HudTraces'
 
 type Props = {
   children: React.ReactNode
@@ -34,6 +35,8 @@ export function HudFrame({ children, label }: Props) {
         <CornerBracket corner="bl" />
         <CornerBracket corner="br" />
       </div>
+
+      <HudTraces />
 
       {label && (
         <div className="fixed top-6 left-8 z-30 max-w-[45vw] truncate font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]">
