@@ -1,8 +1,10 @@
 /**
  * Shared input signals for the canvas renderers: a normalised pointer offset from the
- * viewport centre (−1..1 on each axis) and scroll progress (0..1 down the page). Both
- * are tracked by passive window listeners attached once, lazily, and sampled by the
- * renderers each frame — the same shared-singleton shape as AudioBus.
+ * viewport centre (−1..1 on each axis), scroll progress (0..1 down the page), and scroll
+ * velocity (smoothed speed magnitude). Pointer offset and scroll progress are tracked by
+ * passive window listeners attached once, lazily, and sampled by the renderers each frame
+ * — the same shared-singleton shape as AudioBus. Scroll velocity is instead pushed in
+ * externally by the Lenis scroll layer (there is no native velocity event to listen for).
  *
  * Only the animated canvas reads these, and it never renders under reduced motion
  * (tier `none`), so there is nothing to gate here: if no one samples, no listener attaches.

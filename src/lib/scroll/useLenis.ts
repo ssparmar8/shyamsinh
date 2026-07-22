@@ -5,6 +5,7 @@ import Lenis from 'lenis'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { usePrefersReducedMotion } from '@/lib/motion/usePrefersReducedMotion'
+import { pushScrollVelocity } from '@/lib/canvas/pointer'
 
 // Registered once, SSR-guarded (module is 'use client' but Next still evaluates it on
 // the server while rendering the page that hydrates it). registerPlugin is idempotent.
@@ -28,6 +29,10 @@ export function useLenis() {
 
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true })
     lenis.on('scroll', ScrollTrigger.update)
+    // Lenis's own settling drives its velocity toward 0 before events stop, so the
+    // stored magnitude decays to rest without a separate ticker. Canvas-only; under
+    // reduced motion Lenis never mounts, so velocity stays 0 and reactions are inert.
+    lenis.on('scroll', () => pushScrollVelocity(lenis.velocity))
 
     const onTick = (time: number) => lenis.raf(time * 1000) // ticker seconds → Lenis ms
     gsap.ticker.add(onTick)
