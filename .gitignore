@@ -1,6 +1,9 @@
 # internal brainstorming artifacts — never commit
 .superpowers/
 
+# git worktrees for isolated feature work — never commit
+.worktrees/
+
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
