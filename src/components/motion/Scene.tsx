@@ -5,7 +5,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSceneMode } from '@/lib/motion/useSceneMode'
 import { useReveal } from '@/lib/motion/useReveal'
-import { buildSceneTimeline } from '@/lib/motion/buildSceneTimeline'
+import { buildSceneTimeline, holdFade } from '@/lib/motion/buildSceneTimeline'
 import { SceneContext, type LayerReg, type SceneCtx } from './SceneContext'
 
 if (typeof window !== 'undefined') {
@@ -74,6 +74,13 @@ export function Scene({ children, length = 1, className }: Props) {
         pinSpacing: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          // Settle the beat out over the last of the pin (transform/opacity only — never
+          // layout, so the pin can't jump). `target` is the inner content; the assemble
+          // timeline animates the layer children, so these never fight.
+          const { alpha, y } = holdFade(self.progress)
+          gsap.set(target, { autoAlpha: alpha, y })
+        },
       })
 
       return () => {

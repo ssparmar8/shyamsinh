@@ -4,7 +4,7 @@ const fromTo = vi.fn().mockReturnThis()
 const to = vi.fn().mockReturnThis()
 vi.mock('gsap', () => ({ gsap: { timeline: vi.fn(() => ({ fromTo, to, kill: vi.fn() })) } }))
 
-import { buildSceneTimeline } from './buildSceneTimeline'
+import { buildSceneTimeline, holdFade } from './buildSceneTimeline'
 import type { LayerReg } from '@/components/motion/SceneContext'
 
 function el(): HTMLElement {
@@ -42,5 +42,19 @@ describe('buildSceneTimeline', () => {
     const call = fromTo.mock.calls.find((c) => c[0] === node)
     expect(call).toBeTruthy()
     expect(call![1]).toHaveProperty('clipPath')
+  })
+})
+
+describe('holdFade', () => {
+  it('is a no-op for the first 80% of the pin', () => {
+    expect(holdFade(0)).toEqual({ alpha: 1, y: 0 })
+    expect(holdFade(0.8)).toEqual({ alpha: 1, y: 0 })
+  })
+
+  it('fades toward 0.5 alpha and lifts 16px by the end of the pin', () => {
+    expect(holdFade(1)).toEqual({ alpha: 0.5, y: -16 })
+    const mid = holdFade(0.9) // halfway through the tail
+    expect(mid.alpha).toBeCloseTo(0.75)
+    expect(mid.y).toBeCloseTo(-8)
   })
 })
