@@ -2,6 +2,7 @@ import { MagneticLink } from '@/components/motion/MagneticLink'
 import { CornerBracket } from './CornerBracket'
 import { HudReadout } from './HudReadout'
 import { HudTraces } from './HudTraces'
+import { ScrollProgress } from './ScrollProgress'
 
 type Props = {
   children: React.ReactNode
@@ -50,6 +51,7 @@ export function HudFrame({ children, label }: Props) {
         className="fixed top-6 right-8 z-30 font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)] underline-offset-4 hover:text-[var(--color-ink)] hover:underline"
       />
 
+      <ScrollProgress />
       <HudReadout />
 
       <div className="relative z-10">{children}</div>
