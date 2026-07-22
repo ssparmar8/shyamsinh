@@ -75,3 +75,24 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Custom cursor: the native cursor is hidden ONLY while CursorTrail is mounted (it adds
+ * .cursor-none to <html>), so touch / reduced-motion / record-route visitors are never
+ * affected. Glyph-trail nodes fade out; the fade is opacity-only so it never fights the
+ * inline transform that positions each glyph. */
+.cursor-none, .cursor-none * { cursor: none !important; }
+
+.cursor-glyph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-ghost);
+  pointer-events: none;
+  animation: cursor-glyph-fade 650ms ease-out forwards;
+}
+@keyframes cursor-glyph-fade {
+  from { opacity: 0.9; }
+  to { opacity: 0; }
+}

@@ -1,6 +1,7 @@
 import { Constellation } from '@/components/canvas/Constellation'
 import { EntryOverlay } from '@/components/boot/EntryOverlay'
 import { SmoothScroll } from '@/components/scroll/SmoothScroll'
+import { CursorTrail } from '@/components/cursor/CursorTrail'
 import { HudFrame } from '@/components/hud/HudFrame'
 import { Scene } from '@/components/motion/Scene'
 import { Identity } from '@/components/sections/Identity'
@@ -16,6 +17,7 @@ export default function Home() {
     <>
       <Constellation />
       <SmoothScroll />
+      <CursorTrail />
       <EntryOverlay>
         <HudFrame label="ARCHIVE://">
           <main className="mx-auto max-w-3xl px-6">
