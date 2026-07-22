@@ -16,8 +16,11 @@ import {
   WIRE_MOUSE_PITCH,
   FIELD_PARALLAX,
   POINTER_EASE,
+  velTilt,
+  velZoom,
+  VEL_EASE,
 } from '@/lib/canvas/wireframe'
-import { pointerTarget, scrollProgress } from '@/lib/canvas/pointer'
+import { pointerTarget, scrollProgress, scrollVelocity } from '@/lib/canvas/pointer'
 import { useRafLoop } from '@/lib/canvas/useRafLoop'
 
 const LINK_DIST = 120
@@ -46,6 +49,7 @@ export function RendererWebGL({ count }: { count: number }) {
     wire: THREE.LineSegments
     field: Particle[]
     spin: number
+    vel: number
     px: number
     py: number
     w: number
@@ -110,6 +114,7 @@ export function RendererWebGL({ count }: { count: number }) {
       stateRef.current = {
         renderer, scene, camera, points, lines, wire, field,
         spin: stateRef.current?.spin ?? 0,
+        vel: stateRef.current?.vel ?? 0,
         px: stateRef.current?.px ?? 0,
         py: stateRef.current?.py ?? 0,
         w, h,
@@ -164,11 +169,12 @@ export function RendererWebGL({ count }: { count: number }) {
     // Centerpiece: rotate on the CPU (same math the 2D renderer uses) and write the
     // projected edges as z=0 segments — consistent with how the field is drawn, and
     // inside the ortho camera's near/far.
+    s.vel += (scrollVelocity() - s.vel) * VEL_EASE
     s.spin += WIRE_SPIN * dt
     const sc = scrollProgress()
     const angleY = s.spin + sc * WIRE_SCROLL_TURN + s.px * WIRE_MOUSE_YAW
-    const angleX = WIRE_TILT + s.py * WIRE_MOUSE_PITCH
-    const scale = Math.min(s.w, s.h) * WIRE_SCALE * (1 + sc * WIRE_ZOOM)
+    const angleX = WIRE_TILT + s.py * WIRE_MOUSE_PITCH + velTilt(s.vel)
+    const scale = Math.min(s.w, s.h) * WIRE_SCALE * (1 + sc * WIRE_ZOOM + velZoom(s.vel))
     const pts = rotateProject(WIRE.vertices, angleX, angleY, scale, s.w / 2, s.h / 2)
     const wpos = s.wire.geometry.getAttribute('position') as THREE.BufferAttribute
     let wi = 0 // endpoint write index — not to be confused with s.w (width)
