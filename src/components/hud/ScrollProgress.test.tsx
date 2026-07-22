@@ -10,4 +10,10 @@ describe('ScrollProgress', () => {
     expect(root).toHaveClass('pointer-events-none')
     expect(container.querySelector('[data-testid="scroll-pct"]')?.textContent).toBe('000')
   })
+
+  it('hides itself when the page is too short to scroll', () => {
+    const { container } = render(<ScrollProgress />)
+    const root = container.querySelector('[aria-hidden="true"]') as HTMLElement
+    expect(root.style.display).toBe('none')
+  })
 })

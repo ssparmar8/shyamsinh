@@ -15,7 +15,7 @@ const TAIL_LIFT = 16 // px the outgoing beat lifts as it settles
  */
 export function holdFade(progress: number): { alpha: number; y: number } {
   const f = progress > TAIL_START ? (progress - TAIL_START) / (1 - TAIL_START) : 0
-  return { alpha: 1 - f * (1 - TAIL_ALPHA), y: -TAIL_LIFT * f + 0 }
+  return { alpha: 1 - f * (1 - TAIL_ALPHA), y: -TAIL_LIFT * f + 0 } // + 0 normalises -0 → 0
 }
 
 /**

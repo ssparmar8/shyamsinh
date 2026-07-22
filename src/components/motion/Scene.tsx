@@ -77,7 +77,9 @@ export function Scene({ children, length = 1, className }: Props) {
         onUpdate: (self) => {
           // Settle the beat out over the last of the pin (transform/opacity only — never
           // layout, so the pin can't jump). `target` is the inner content; the assemble
-          // timeline animates the layer children, so these never fight.
+          // timeline animates the beat's layer children (or, for an unannotated beat, the
+          // root itself as a one-shot reveal that finishes before this tail begins), so the
+          // two are scroll-sequential and don't fight.
           const { alpha, y } = holdFade(self.progress)
           gsap.set(target, { autoAlpha: alpha, y })
         },
