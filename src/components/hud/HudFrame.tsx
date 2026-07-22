@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { MagneticLink } from '@/components/motion/MagneticLink'
 import { CornerBracket } from './CornerBracket'
 import { HudReadout } from './HudReadout'
 import { HudTraces } from './HudTraces'
@@ -44,12 +44,11 @@ export function HudFrame({ children, label }: Props) {
         </div>
       )}
 
-      <Link
+      <MagneticLink
         href="/contact"
+        text="◂ UPLINK"
         className="fixed top-6 right-8 z-30 font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)] underline-offset-4 hover:text-[var(--color-ink)] hover:underline"
-      >
-        ◂ UPLINK
-      </Link>
+      />
 
       <HudReadout />
 

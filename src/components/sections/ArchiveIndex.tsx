@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { MagneticLink } from '@/components/motion/MagneticLink'
 import { getArchive, recordNumber } from '@/content'
 import { DecodeLine } from '@/components/motion/layers/DecodeLine'
 import { Rise } from '@/components/motion/layers/Rise'
@@ -23,7 +23,7 @@ export function ArchiveIndex() {
           <li key={s.slug}>
             <Rise>
               {/* Domain hidden below md, matching /archive's own Row component. */}
-              <Link
+              <MagneticLink
                 href={`/systems/${s.slug}`}
                 className="grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-3 border-b border-[var(--color-border)] py-3 hover:border-[var(--color-ink)] md:grid-cols-[2.5rem_1fr_1fr_auto]"
               >
@@ -35,16 +35,18 @@ export function ArchiveIndex() {
                 />
                 <span className={`${LABEL} hidden md:block`}>{s.domain}</span>
                 <span className={LABEL}>{s.year} ▸</span>
-              </Link>
+              </MagneticLink>
             </Rise>
           </li>
         ))}
       </ul>
 
       <Rise as="div" className="mt-8">
-        <Link href="/archive" className={`${LABEL} inline-block hover:text-[var(--color-ink)]`}>
-          ▸ FULL ARCHIVE INDEX
-        </Link>
+        <MagneticLink
+          href="/archive"
+          text="▸ FULL ARCHIVE INDEX"
+          className={`${LABEL} inline-block hover:text-[var(--color-ink)]`}
+        />
       </Rise>
     </section>
   )

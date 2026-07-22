@@ -29,4 +29,8 @@ describe('useCursorEnabled', () => {
     setEnv({ fine: false, reduced: false })
     expect(renderHook(() => useCursorEnabled()).result.current).toBe(false)
   })
+  it('returns false and does not throw when matchMedia is unavailable', () => {
+    vi.stubGlobal('matchMedia', undefined)
+    expect(renderHook(() => useCursorEnabled()).result.current).toBe(false)
+  })
 })

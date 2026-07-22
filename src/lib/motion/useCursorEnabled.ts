@@ -11,7 +11,7 @@ function read(): boolean {
 }
 
 function subscribe(onChange: () => void): () => void {
-  if (typeof window === 'undefined') return () => {}
+  if (typeof window === 'undefined' || typeof matchMedia !== 'function') return () => {}
   const fine = matchMedia(FINE)
   const rm = matchMedia(RM)
   fine.addEventListener('change', onChange)
