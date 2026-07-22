@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { hexBipyramid, rotateProject } from './wireframe'
+import { hexBipyramid, rotateProject, velTilt, velZoom, WIRE_VEL_TILT, WIRE_VEL_ZOOM, VEL_MAX } from './wireframe'
 
 describe('hexBipyramid', () => {
   it('has 8 vertices and 18 edges', () => {
@@ -41,5 +41,23 @@ describe('rotateProject', () => {
     expect(pts[3].x).toBeCloseTo(300)
     expect(pts[0].y).toBeCloseTo(300)
     expect(pts[3].y).toBeCloseTo(300)
+  })
+})
+
+describe('velocity reactions', () => {
+  it('are 0 at rest', () => {
+    expect(velTilt(0)).toBe(0)
+    expect(velZoom(0)).toBe(0)
+  })
+
+  it('reach their max gain at VEL_MAX and are sign-agnostic', () => {
+    expect(velTilt(VEL_MAX)).toBeCloseTo(WIRE_VEL_TILT)
+    expect(velTilt(-VEL_MAX)).toBeCloseTo(WIRE_VEL_TILT)
+    expect(velZoom(VEL_MAX)).toBeCloseTo(WIRE_VEL_ZOOM)
+  })
+
+  it('clamp beyond VEL_MAX so a flick cannot explode the effect', () => {
+    expect(velTilt(9999)).toBeCloseTo(WIRE_VEL_TILT)
+    expect(velZoom(9999)).toBeCloseTo(WIRE_VEL_ZOOM)
   })
 })

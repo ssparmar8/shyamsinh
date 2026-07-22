@@ -19,6 +19,14 @@ export const WIRE_MOUSE_PITCH = 0.25 // rad it pitches toward the cursor (y)
 export const FIELD_PARALLAX = 14 // px the constellation field shifts against the cursor
 export const POINTER_EASE = 0.06 // per-frame lerp toward the pointer target
 
+// Scroll-velocity reactions (restrained): extra tilt/zoom proportional to scroll speed,
+// clamped so a flick can't spin the crystal. Renderers ease their local velocity toward
+// scrollVelocity() with VEL_EASE, so the reaction settles when scrolling stops.
+export const WIRE_VEL_TILT = 0.12 // max extra X-tilt (rad) at VEL_MAX
+export const WIRE_VEL_ZOOM = 0.06 // max extra scale gain at VEL_MAX
+export const VEL_MAX = 40 // px/frame at which the reaction saturates
+export const VEL_EASE = 0.1 // per-frame lerp toward the scroll-velocity target
+
 /**
  * A hexagonal bipyramid: a 6-vertex ring in the z=0 plane plus a top and bottom
  * apex. 8 vertices, 18 edges (ring 6 + top spokes 6 + bottom spokes 6). Sparse on
@@ -68,4 +76,14 @@ export function rotateProject(
     const x = v.x * cosY + z * sinY
     return { x: cx + x * scale, y: cy + y * scale }
   })
+}
+
+/** Pure: extra centerpiece tilt (rad) for a scroll-speed magnitude, 0..WIRE_VEL_TILT. */
+export function velTilt(vel: number): number {
+  return (Math.min(VEL_MAX, Math.abs(vel)) / VEL_MAX) * WIRE_VEL_TILT
+}
+
+/** Pure: extra centerpiece scale gain for a scroll-speed magnitude, 0..WIRE_VEL_ZOOM. */
+export function velZoom(vel: number): number {
+  return (Math.min(VEL_MAX, Math.abs(vel)) / VEL_MAX) * WIRE_VEL_ZOOM
 }
