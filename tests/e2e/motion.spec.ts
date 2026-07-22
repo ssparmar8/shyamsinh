@@ -106,3 +106,36 @@ test.describe('the animated canvas', () => {
     await context.close()
   })
 })
+
+test.describe('custom cursor + scroll progress (desktop)', () => {
+  test('the glyph-trail caret mounts on / for a fine pointer', async ({ page }) => {
+    await enter(page)
+    await page.mouse.move(640, 400)
+    await expect(page.getByTestId('cursor-caret')).toBeAttached({ timeout: 5000 })
+  })
+
+  test('the scroll-progress readout advances as the page scrolls', async ({ page }) => {
+    await enter(page)
+    const pct = page.getByTestId('scroll-pct')
+    await expect(pct).toHaveText('000')
+    for (let i = 0; i < 20; i++) {
+      await page.mouse.wheel(0, 300)
+      await page.waitForTimeout(60)
+    }
+    const value = Number(await pct.textContent())
+    expect(value).toBeGreaterThan(5)
+  })
+})
+
+test.describe('custom cursor: absent when motion is off', () => {
+  test.use({ contextOptions: { reducedMotion: 'reduce' } })
+
+  test('no caret under reduced motion', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => localStorage.clear())
+    await page.reload()
+    await page.mouse.move(640, 400)
+    await page.waitForTimeout(300)
+    await expect(page.getByTestId('cursor-caret')).toHaveCount(0)
+  })
+})
