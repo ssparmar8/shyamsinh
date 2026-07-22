@@ -20,6 +20,16 @@ export function scrollProgressOf(scrollY: number, scrollHeight: number, viewH: n
   return Math.min(1, Math.max(0, scrollY / max))
 }
 
+/**
+ * Pure: smoothed scroll-speed magnitude. Attacks instantly toward a faster sample and
+ * releases ~0.9/frame, so the centerpiece reacts immediately to a flick and settles
+ * when scrolling stops. Snaps to 0 below a noise floor so "at rest" is exactly rest.
+ */
+export function smoothVelocity(prev: number, sample: number): number {
+  const next = Math.max(Math.abs(sample), prev * 0.9)
+  return next < 0.01 ? 0 : next
+}
+
 let targetX = 0
 let targetY = 0
 let progress = 0
@@ -54,4 +64,16 @@ export function pointerTarget(): { x: number; y: number } {
 export function scrollProgress(): number {
   attach()
   return progress
+}
+
+let velocity = 0
+
+/** Feed a raw signed scroll velocity (px/frame); stored as a smoothed magnitude. */
+export function pushScrollVelocity(sample: number): void {
+  velocity = smoothVelocity(velocity, sample)
+}
+
+/** Current smoothed scroll-speed magnitude (0 at rest). Renderers ease toward this. */
+export function scrollVelocity(): number {
+  return velocity
 }
