@@ -12,9 +12,9 @@ const VOICES: Record<Sound, { freq: number; to: number; ms: number; type: Oscill
  * Synthesized SFX. No audio files exist in this project and none should.
  *
  * Muted is a genuine no-op: no AudioContext is constructed at all, so a visitor
- * who chose OFF pays nothing — not a download, not a suspended context. That is
- * also why the gate's "NO AMBIENT LOOP" claim is true by construction rather than
- * by discipline: there is no loop to forget to stop.
+ * with audio off pays nothing — not a download, not a suspended context. There is
+ * also no ambient loop by construction rather than by discipline: every voice is a
+ * short one-shot, so there is no loop to forget to stop.
  *
  * Every browser call is wrapped. Audio is decoration; a browser that blocks or
  * lacks the API must degrade to silence, never to a broken page.

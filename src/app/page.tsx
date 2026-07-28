@@ -19,7 +19,7 @@ export default function Home() {
       <SmoothScroll />
       <CursorTrail />
       <EntryOverlay>
-        <HudFrame label="ARCHIVE://">
+        <HudFrame>
           <main className="mx-auto max-w-3xl px-6">
             {/* Each beat is a Scene: pinned + scroll-scrubbed on pointer/wide, one-shot
                 reveal on touch, full static content under reduced motion (see Scene.tsx).

@@ -41,7 +41,7 @@ export default async function SystemPage({
   const index = recordNumber(slug) - 1
 
   return (
-    <HudFrame label="ARCHIVE://">
+    <HudFrame>
       <main className="mx-auto max-w-3xl px-6 pt-24 pb-24">
         {/* animate=false: this addressable route is spec'd "fast, static" (design §8);
             the decode/typewriter belongs to the home scroll, not the one-link detail page. */}

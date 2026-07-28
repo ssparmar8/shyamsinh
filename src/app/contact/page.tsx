@@ -12,7 +12,7 @@ const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--
 
 export default function ContactPage() {
   return (
-    <HudFrame label="UPLINK://">
+    <HudFrame>
       <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-24">
         <div className={LABEL}>{'// UPLINK'}</div>
 

@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * The entry experience (Plan 2): audio gate, boot sequence, decode-animated
- * hero text, and Lenis smooth scroll — mounted at `/` only, as an overlay ON TOP
- * of server-rendered content, never a replacement for it.
+ * The entry experience (Plan 2): boot sequence, decode-animated hero text, and
+ * Lenis smooth scroll — mounted at `/` only, as an overlay ON TOP of
+ * server-rendered content, never a replacement for it.
  *
  * Every one of these was a manual, throwaway check during Plan 2's execution
  * (each task's "MANDATORY browser verification" step). This file exists to make
@@ -13,41 +13,17 @@ import { test, expect } from '@playwright/test'
  */
 
 test.describe('the entry experience', () => {
-  test('a first-time visitor gets the gate, and content is still in the HTML', async ({ page }) => {
-    await page.context().clearCookies()
+  test('a visitor gets the boot, and content is still in the HTML', async ({ page }) => {
     await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
-    await page.reload()
-    await expect(page.getByText(/OUTPUT ROUTING/i)).toBeVisible()
-    // The gate must COVER content, never replace it — crawlers and no-JS visitors
+    await expect(page.getByText(/LOADING/i)).toBeVisible()
+    // The boot must COVER content, never replace it — crawlers and no-JS visitors
     // see the page regardless.
     expect(await page.content()).toContain('Shyamsinh Parmar')
   })
 
-  test('the gate never returns once a choice is made', async ({ page }) => {
-    await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
-    await page.reload()
-    await page.getByRole('button', { name: /OFF/i }).click()
-    await page.getByRole('button', { name: /SKIP/i }).click()
-    await page.reload()
-
-    // The "should I show the gate" decision is made in an effect after
-    // hydration, not at first paint. A single immediate check could pass merely
-    // because the effect hasn't run yet — a false pass that would hide a
-    // regression where `readGate()` stops being consulted. Hold the assertion
-    // over a real window instead of trusting one poll.
-    const deadline = Date.now() + 1000
-    while (Date.now() < deadline) {
-      expect(await page.getByText(/OUTPUT ROUTING/i).count()).toBe(0)
-      await page.waitForTimeout(50)
-    }
-  })
-
-  test('a record route never shows the gate', async ({ page }) => {
-    await page.evaluate(() => localStorage.clear()).catch(() => {})
+  test('a record route never shows the boot', async ({ page }) => {
     await page.goto('/systems/aiva')
-    await expect(page.getByText(/OUTPUT ROUTING/i)).toHaveCount(0)
+    await expect(page.getByText(/LOADING/i)).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'AIVA Chat' })).toBeVisible()
   })
 
@@ -91,24 +67,21 @@ test.describe('reduced motion gets the site, not a performance', () => {
   // versions, just through the API shape this version actually exposes.
   test.use({ contextOptions: { reducedMotion: 'reduce' } })
 
-  test('no gate, no boot, content immediately', async ({ page }) => {
+  test('no boot, content immediately', async ({ page }) => {
     await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
-    await page.reload()
 
     // Content must be visible right away regardless of JS — it's server-rendered
     // either way, so this alone does not prove reduced motion was honored.
     await expect(page.getByRole('heading', { name: /Shyamsinh Parmar/i })).toBeVisible()
 
-    // The real proof: the gate/boot decision runs in an effect after hydration,
-    // not at first paint. Checking absence exactly once, immediately, risks a
-    // false pass — it could succeed merely because the effect hasn't run yet,
-    // which would hide a regression where reduced-motion detection silently
-    // breaks and the gate shows up a beat later. Poll across a window comfortably
-    // longer than hydration, so a gate that appears late is still caught.
+    // The real proof: the boot decision runs in an effect after hydration, not at
+    // first paint. Checking absence exactly once, immediately, risks a false pass
+    // — it could succeed merely because the effect hasn't run yet, which would
+    // hide a regression where reduced-motion detection silently breaks and the
+    // boot shows up a beat later. Poll across a window comfortably longer than
+    // hydration, so a boot that appears late is still caught.
     const deadline = Date.now() + 1000
     while (Date.now() < deadline) {
-      expect(await page.getByText(/OUTPUT ROUTING/i).count()).toBe(0)
       expect(await page.getByText(/LOADING/i).count()).toBe(0)
       await page.waitForTimeout(50)
     }
@@ -118,8 +91,6 @@ test.describe('reduced motion gets the site, not a performance', () => {
 test.describe('above-the-fold decode', () => {
   test('the hero name decodes from glyph noise and settles on the real text; the accessible name is always correct', async ({ page }) => {
     await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
-    await page.reload()
 
     const hero = page.locator('h1')
     await hero.waitFor({ state: 'attached' })
@@ -133,7 +104,7 @@ test.describe('above-the-fold decode', () => {
 
     // Sample the noise layer across frames, in-browser (the same technique the
     // plan used in Task 3 to catch this exact defect). Sampling starts
-    // immediately: the decode may already be running under the gate/boot overlay,
+    // immediately: the decode may already be running under the boot overlay,
     // since EntryOverlay always renders its children — the overlay only covers
     // them visually and marks them `inert`, which does not pause rAF — so a
     // window that only starts after dismissal risks sampling nothing but an
@@ -156,12 +127,11 @@ test.describe('above-the-fold decode', () => {
       'the decode noise layer never produced more than one distinct frame',
     ).toBeGreaterThan(10)
 
-    // Dismiss gate + boot so the hero — genuinely above the fold once the overlay
-    // is gone — is what a visitor actually sees. This exercises the above-fold
+    // Dismiss the boot so the hero — genuinely above the fold once the overlay is
+    // gone — is what a visitor actually sees. This exercises the above-fold
     // rootMargin fix: an earlier `useOnScreen` shrank all four edges of its IO
     // root, so an element already at the top of the viewport never intersected,
     // and its decode never ran, leaving raw noise forever.
-    await page.getByRole('button', { name: /OFF/i }).click()
     await page.getByRole('button', { name: /SKIP/i }).click()
     await expect(page.getByText(/LOADING/i)).toHaveCount(0)
     await expect(hero).toBeVisible()

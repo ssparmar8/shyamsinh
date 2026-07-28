@@ -6,21 +6,21 @@ import { test, expect } from '@playwright/test'
  * something to escape (the cinematic entry, built in this plan).
  *
  * `/systems/*`, `/archive`, and `/contact` are for a visitor who wants the facts
- * in ten seconds: no gate, no boot, no animation libraries, a real HTTP status,
- * and never a client's private hostname. See `entry.spec.ts` for the gate/boot/
- * decode/Lenis checks these routes must stay untouched by.
+ * in ten seconds: no boot, no animation libraries, a real HTTP status, and never
+ * a client's private hostname. See `entry.spec.ts` for the boot/decode/Lenis
+ * checks these routes must stay untouched by.
  */
 
 const PRIVATE_HOST = 'ai-uat.medicalofficeforce.co'
 
 test.describe('static route guarantees', () => {
-  test('/systems/aiva renders its content immediately, with no gate', async ({ page }) => {
+  test('/systems/aiva renders its content immediately, with no boot', async ({ page }) => {
     const response = await page.goto('/systems/aiva')
     expect(response?.status()).toBe(200)
-    // EntryOverlay is never mounted on a record route at all — not gate, not
-    // boot, not even transiently. That is a structural guarantee (the component
-    // isn't in this route's tree), so a single check is enough here, unlike `/`'s
-    // gate-suppression checks in entry.spec.ts, which have to prove a *runtime
+    // EntryOverlay is never mounted on a record route at all — not even
+    // transiently. That is a structural guarantee (the component isn't in this
+    // route's tree), so a single check is enough here, unlike `/`'s
+    // boot-suppression checks in entry.spec.ts, which have to prove a *runtime
     // decision* holds rather than that a code path is simply absent.
     await expect(page.getByRole('dialog')).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'AIVA Chat' })).toBeVisible()
@@ -32,20 +32,15 @@ test.describe('static route guarantees', () => {
     await expect(rows).toHaveCount(18)
   })
 
-  test('a record route reaches /contact via the persistent UPLINK in one click, even scrolled down', async ({ page }) => {
-    // HudFrame's UPLINK link is `fixed`, not `absolute`. An earlier version used
-    // `absolute` inside a height:auto box, which anchored the chrome to the
-    // document instead of the viewport — on any page taller than one viewport the
-    // whole chrome, UPLINK included, scrolled away with the content it was meant
-    // to sit above. Scrolling to the bottom before clicking is what actually
-    // exercises that regression instead of only ever testing from the top.
+  test('a record route shows no header chrome — no route label, no UPLINK', async ({ page }) => {
+    // The top row is bare by design. Check at the bottom of the page too: the
+    // chrome is `fixed`, so anything still rendered there would follow the
+    // viewport down and reappear rather than scroll away with the content.
     await page.goto('/systems/aiva')
+    await expect(page.getByRole('link', { name: /UPLINK/i })).toHaveCount(0)
+    await expect(page.getByText('ARCHIVE://')).toHaveCount(0)
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-    const uplink = page.getByRole('link', { name: /UPLINK/i })
-    await expect(uplink).toBeVisible()
-    await uplink.click()
-    await expect(page).toHaveURL(/\/contact$/)
-    await expect(page.locator('a[href^="mailto:"]')).toBeVisible()
+    await expect(page.getByRole('link', { name: /UPLINK/i })).toHaveCount(0)
   })
 
   test('an unknown system slug returns a real 404, not a soft one', async ({ page }) => {

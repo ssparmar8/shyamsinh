@@ -8,15 +8,11 @@ describe('HudFrame', () => {
     expect(screen.getByText('RECORD_LOG')).toBeInTheDocument()
   })
 
-  it('renders the label when given one', () => {
-    render(<HudFrame label="ARCHIVE://"><p>x</p></HudFrame>)
-    expect(screen.getByText('ARCHIVE://')).toBeInTheDocument()
-  })
-
-  it('points the contact link at /contact', () => {
+  /** The top row carries no route label and no contact link. */
+  it('renders no header chrome in the top row', () => {
     render(<HudFrame><p>x</p></HudFrame>)
-    const link = screen.getByRole('link', { name: /uplink/i })
-    expect(link).toHaveAttribute('href', '/contact')
+    expect(screen.queryByText('ARCHIVE://')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /uplink/i })).not.toBeInTheDocument()
   })
 
   /**
@@ -24,17 +20,14 @@ describe('HudFrame', () => {
    *
    * `min-h-dvh` is a floor, not a cap: the box grows to content height, so
    * `absolute` chrome anchors to the document and scrolls away. Measured on a
-   * 3096px page in a 964px viewport, mid-scroll showed no brackets and no contact
-   * link — the escape hatch this component exists to provide, gone.
+   * 3096px page in a 964px viewport, mid-scroll showed no brackets at all.
    *
    * jsdom does not lay out, so it cannot observe the outcome. This asserts the
-   * mechanism; `tests/e2e/routes.spec.ts` scrolls a real browser and asserts the
-   * outcome. Both are needed — this one alone would pass on a rewrite that broke it.
+   * mechanism only.
    */
-  it('pins the contact link and label to the viewport, not the document', () => {
-    render(<HudFrame label="ARCHIVE://"><p>x</p></HudFrame>)
-    expect(screen.getByRole('link', { name: /uplink/i }).className).toMatch(/\bfixed\b/)
-    expect(screen.getByText('ARCHIVE://').className).toMatch(/\bfixed\b/)
+  it('pins its chrome to the viewport, not the document', () => {
+    const { container } = render(<HudFrame><p>x</p></HudFrame>)
+    expect(container.querySelectorAll('.fixed').length).toBeGreaterThan(0)
   })
 
   it('marks decorative brackets as hidden from assistive tech', () => {

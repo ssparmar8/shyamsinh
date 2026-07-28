@@ -1,11 +1,8 @@
 import { test, expect, type Page } from '@playwright/test'
 
-// Dismisses the gate + boot so the scroll experience is what a visitor sees.
+// Dismisses the boot so the scroll experience is what a visitor sees.
 async function enter(page: Page) {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
-  await page.reload()
-  await page.getByRole('button', { name: /OFF/i }).click()
   await page.getByRole('button', { name: /SKIP/i }).click()
   await expect(page.getByText(/LOADING/i)).toHaveCount(0)
 }

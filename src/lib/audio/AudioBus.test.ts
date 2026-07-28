@@ -82,9 +82,8 @@ describe('AudioBus', () => {
   })
 
   /**
-   * The gate promises "NO AMBIENT LOOP". Make that structurally true rather than a
-   * matter of discipline: every voice must be a short one-shot with a stop time.
-   * A looping oscillator would make the gate's own copy a lie.
+   * No ambient loop, structurally rather than as a matter of discipline: every
+   * voice must be a short one-shot with a stop time.
    */
   it('always schedules a stop — no sound can loop', () => {
     AudioBus.enable()

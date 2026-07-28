@@ -33,7 +33,7 @@ function Row({ system }: { system: System }) {
 
 export default function ArchivePage() {
   return (
-    <HudFrame label="ARCHIVE://">
+    <HudFrame>
       <main className="mx-auto max-w-3xl px-6 pt-24 pb-24">
         <h1 className="font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]">
           ARCHIVE INDEX

@@ -13,7 +13,7 @@ const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--
  */
 export default function NotFound() {
   return (
-    <HudFrame label="ARCHIVE://">
+    <HudFrame>
       <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-24">
         <div className={LABEL}>{'// LOOKUP'}</div>
         <h1 className="mt-3 font-mono text-2xl tracking-[var(--tracking-wide)] text-[var(--color-ink)] md:text-4xl">
