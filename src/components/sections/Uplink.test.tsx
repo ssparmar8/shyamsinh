@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { Uplink } from './Uplink'
-import { IDENTITY } from '@/content/identity'
+import { IDENTITY, availabilityLabel } from '@/content/identity'
 
 describe('Uplink', () => {
   it('renders without throwing and shows a mailto link with the email', () => {
@@ -17,6 +17,26 @@ describe('Uplink', () => {
         'href',
         l.href,
       )
+    }
+  })
+
+  /** The beat where someone decides to make contact must say whether he is taking work. */
+  it('states availability, like the hero does', () => {
+    render(<Uplink />)
+    expect(screen.getByText(availabilityLabel())).toBeInTheDocument()
+  })
+
+  /** The phone is a channel a client can act on now, not a footnote under the address. */
+  it('offers the phone as a dialable link', () => {
+    render(<Uplink />)
+    const tel = screen.getByRole('link', { name: IDENTITY.phone })
+    expect(tel).toHaveAttribute('href', `tel:${IDENTITY.phone.replace(/\s/g, '')}`)
+  })
+
+  it('captions each channel', () => {
+    render(<Uplink />)
+    for (const caption of ['EMAIL', 'PHONE', 'BASE']) {
+      expect(screen.getByText(caption)).toBeInTheDocument()
     }
   })
 })

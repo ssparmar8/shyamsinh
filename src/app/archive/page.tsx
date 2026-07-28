@@ -11,19 +11,40 @@ export const metadata: Metadata = {
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 
+/** Kept identical to the home beat's GRID (ArchiveIndex.tsx) — same records, same columns. */
+const GRID =
+  'grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-x-3 md:grid-cols-[2.5rem_1fr_1fr_auto]'
+
+function Head() {
+  return (
+    <div className={`${GRID} ${LABEL} mt-3 border-b border-[var(--color-border)] pb-2`}>
+      <span>NO</span>
+      <span>SYSTEM</span>
+      <span className="hidden md:block">DOMAIN</span>
+      <span className="text-right">REGION · YEAR</span>
+    </div>
+  )
+}
+
 function Row({ system }: { system: System }) {
   return (
     <li>
       <Link
         href={`/systems/${system.slug}`}
-        className="grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-3 border-b border-[var(--color-border)] py-3 hover:border-[var(--color-ink)] md:grid-cols-[2.5rem_1fr_1fr_auto]"
+        className={`${GRID} border-b border-[var(--color-border)] py-3 hover:border-[var(--color-ink)]`}
       >
-        <span className={LABEL}>{String(recordNumber(system.slug)).padStart(2, '0')}</span>
-        <span className="font-mono text-sm tracking-[var(--tracking-hud)] text-[var(--color-ink)]">
+        <span className={`${LABEL} col-start-1 row-start-1`}>
+          {String(recordNumber(system.slug)).padStart(2, '0')}
+        </span>
+        <span className="col-start-2 row-start-1 font-mono text-sm tracking-[var(--tracking-hud)] text-[var(--color-ink)]">
           {system.name}
         </span>
-        <span className={`${LABEL} hidden md:block`}>{system.domain}</span>
-        <span className={LABEL}>
+        {/* Wraps to a second line below md rather than being hidden: the domain is the field
+            that says what a record is, and dropping it left a phone with a name and a year. */}
+        <span className={`${LABEL} col-start-2 row-start-2 md:col-start-3 md:row-start-1`}>
+          {system.domain}
+        </span>
+        <span className={`${LABEL} col-start-3 row-start-1 text-right md:col-start-4`}>
           {system.region} · {system.year} ▸
         </span>
       </Link>
@@ -43,12 +64,14 @@ export default function ArchivePage() {
         </div>
 
         <div className={`${LABEL} mt-12`}>{'// FEATURED'}</div>
-        <ul className="mt-3">
+        <Head />
+        <ul>
           {getFeatured().map((s) => <Row key={s.slug} system={s} />)}
         </ul>
 
         <div className={`${LABEL} mt-12`}>{'// INDEX'}</div>
-        <ul className="mt-3">
+        <Head />
+        <ul>
           {getArchive().map((s) => <Row key={s.slug} system={s} />)}
         </ul>
 
