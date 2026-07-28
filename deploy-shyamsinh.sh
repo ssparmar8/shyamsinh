@@ -24,10 +24,9 @@ URL=https://d39zi9n61r4f1n.cloudfront.net/
 
 cd "$(dirname "$0")"
 
-if [[ "${1:-}" != "--no-build" ]]; then
-  echo "==> Building static export (out/) ..."
-  npm run build
-fi
+echo "==> Building static export (out/) ..."
+npm run build
+
 
 if [[ ! -d out ]]; then
   echo "ERROR: out/ not found. Run 'npm run build' first." >&2

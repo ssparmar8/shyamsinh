@@ -90,6 +90,25 @@ test.describe('reduced motion gets the site, not a performance', () => {
 
 test.describe('above-the-fold decode', () => {
   test('the hero name decodes from glyph noise and settles on the real text; the accessible name is always correct', async ({ page }) => {
+    // Sampling is installed BEFORE navigation, and runs on rAF inside the page.
+    //
+    // The h1's noise layer only exists after hydration, and the decode starts in that same
+    // beat and lasts 1100ms — so a sampler that opens after Playwright has round-tripped a
+    // `waitFor` and a text assertion is racing an animation that may already be finished. It
+    // was: on a slow load this reported a single frame and failed the run, which reads as
+    // "the decode is frozen" when the decode was fine and the observer was simply late.
+    // Watching from document start removes the race — every frame the noise layer ever
+    // rendered is already recorded by the time the assertion below reads the count.
+    await page.addInitScript(() => {
+      const seen = new Set<string>()
+      ;(window as unknown as { __heroFrames: Set<string> }).__heroFrames = seen
+      const tick = () => {
+        const el = document.querySelector('h1 [aria-hidden="true"]')
+        if (el) seen.add(el.textContent ?? '')
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    })
     await page.goto('/')
 
     const hero = page.locator('h1')
@@ -102,24 +121,16 @@ test.describe('above-the-fold decode', () => {
     // reader must never hear scramble noise.
     await expect(srOnly).toHaveText('Shyamsinh Parmar')
 
-    // Sample the noise layer across frames, in-browser (the same technique the
-    // plan used in Task 3 to catch this exact defect). Sampling starts
-    // immediately: the decode may already be running under the boot overlay,
-    // since EntryOverlay always renders its children — the overlay only covers
-    // them visually and marks them `inert`, which does not pause rAF — so a
-    // window that only starts after dismissal risks sampling nothing but an
-    // already-settled frame. If the count is never more than 1, the decode
-    // rendered a frozen mask and never animated — this exact defect shipped in
-    // Plan 1 with all 7 of its tests green.
-    const distinctFrames = await noise.evaluate(
-      (el) =>
+    // Read the frames the init-script sampler collected. The decode runs under the boot
+    // overlay — EntryOverlay always renders its children, and `inert` does not pause rAF —
+    // so this window covers it whether or not the overlay has been dismissed. If the count
+    // is never more than 1, the decode rendered a frozen mask and never animated: this exact
+    // defect shipped in Plan 1 with all 7 of its tests green.
+    const distinctFrames = await page.evaluate(
+      () =>
         new Promise<number>((resolve) => {
-          const seen = new Set<string>()
-          const id = setInterval(() => seen.add(el.textContent ?? ''), 16)
-          setTimeout(() => {
-            clearInterval(id)
-            resolve(seen.size)
-          }, 1500)
+          const frames = (window as unknown as { __heroFrames: Set<string> }).__heroFrames
+          setTimeout(() => resolve(frames.size), 1500)
         }),
     )
     expect(

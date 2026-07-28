@@ -67,6 +67,21 @@ body {
   animation: hud-trace 1.4s ease-out both;
 }
 
+/* The hero's availability dot. It breathes rather than blinks — a hard on/off reads as an
+ * alert, and nothing here is urgent.
+ *
+ * The keyframe ENDS opaque on purpose. The reduced-motion rule below collapses every
+ * animation to one 0.01ms iteration, which leaves an element parked on its final frame; if
+ * this ran 1 → 0.3 the reduced-motion visitor would be handed a dot faded almost out and
+ * read it as "offline". Ending at 1 makes that degradation a steady, fully-lit dot. */
+@keyframes status-pulse {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+.status-pulse {
+  animation: status-pulse 1.6s ease-in-out infinite alternate both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

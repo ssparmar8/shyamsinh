@@ -3,6 +3,17 @@ import { CAREER_START_YEAR } from './schema'
 export const IDENTITY = {
   name: 'Shyamsinh Parmar',
   title: 'AI & Backend Architect',
+  /**
+   * The one sentence a visitor reads before deciding whether to keep scrolling — the hero
+   * carried a name, a job title and four counts, none of which say what the work IS.
+   *
+   * It is a claim, so it stays inside what the archive can back: voice/conversational agents
+   * (AIVA, MOF FrontDesk), the platforms underneath them, and architecture-plus-delivery as
+   * the actual role (see CONTRACT_ROLE in systems.ts). The three named verticals are the
+   * three with the most records. Narrow it or widen it when the archive moves, not before.
+   */
+  pitch:
+    'I design and ship production AI systems — voice agents, LLM pipelines, and the backends that carry them — for teams in healthcare, legal, and compliance.',
   location: 'Gujarat, India',
   locationCode: 'IN',
   email: 'parmarshyamsingh8@gmail.com',
@@ -30,6 +41,26 @@ export const IDENTITY = {
     { label: 'LINKEDIN', href: 'https://www.linkedin.com/in/shyamsinh-parmar-7ba284167/' },
   ],
 } as const
+
+/**
+ * Whether he is taking work, as data rather than prose.
+ *
+ * Deliberately NOT inside the `as const` IDENTITY object: there, `open` would narrow to the
+ * literal type `true` and the booked branch would become unreachable at the type level — a
+ * status field that cannot be turned off is a lie waiting to ship. The explicit `boolean`
+ * keeps both branches real, so going booked is a one-word edit here and nothing else.
+ */
+export type Availability = { open: boolean; openLabel: string; closedLabel: string }
+
+export const AVAILABILITY: Availability = {
+  open: true,
+  openLabel: 'AVAILABLE FOR CONTRACT',
+  // Not "unavailable" — the phone and email stay published either way (see IDENTITY.phone).
+  closedLabel: 'BOOKED · ENQUIRIES OPEN',
+}
+
+export const availabilityLabel = (a: Availability = AVAILABILITY): string =>
+  a.open ? a.openLabel : a.closedLabel
 
 /** Derived, never hardcoded — so correcting the anchor corrects the whole site. */
 export const yearsExperience = (now = new Date().getFullYear()): number =>

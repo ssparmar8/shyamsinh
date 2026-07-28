@@ -16,16 +16,23 @@ test.describe('pinned scrub scenes (desktop)', () => {
 
     // Wheel down in small steps through the Systems beat, sampling its top each step. A
     // pinned section's top stays near 0 while the scroll position keeps advancing.
+    //
+    // The step size is load-bearing. Systems pins for `length={0.5}` — about 360px of scroll
+    // at a 720px viewport — so at the 150px step this used to take, only two samples could
+    // land inside the near-top window and ySpan measured the gap between two arbitrary sample
+    // points, not the pin. Any change to a beat ABOVE Systems shifted that phase and flipped
+    // the result: the hero growing by a few lines took it from comfortably passing to 148.
+    // 60px steps put ~7 samples inside a real pin, so ySpan converges on the actual hold.
     const samples: { y: number; top: number }[] = []
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 200; i++) {
       const s = await page.evaluate(() => ({
         y: Math.round(window.scrollY),
         top: Math.round((document.querySelector('#systems') as HTMLElement).getBoundingClientRect().top),
       }))
       samples.push(s)
       if (s.top < -120) break // scrolled well past the pin
-      await page.mouse.wheel(0, 150)
-      await page.waitForTimeout(90)
+      await page.mouse.wheel(0, 60)
+      await page.waitForTimeout(60)
     }
 
     const nearTop = samples.filter((s) => s.top >= -25 && s.top <= 35)

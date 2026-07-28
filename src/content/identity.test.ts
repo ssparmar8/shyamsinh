@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { IDENTITY, yearsExperience } from './identity'
+import { IDENTITY, AVAILABILITY, availabilityLabel, yearsExperience } from './identity'
 import { CAREER_START_YEAR } from './schema'
 
 describe('IDENTITY', () => {
@@ -34,5 +34,23 @@ describe('IDENTITY', () => {
 
   it('has a plausible email', () => {
     expect(IDENTITY.email).toMatch(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)
+  })
+
+  /** The hero renders it as one paragraph — a second sentence would wrap past the beat. */
+  it('has a one-sentence pitch', () => {
+    expect(IDENTITY.pitch.trim().length).toBeGreaterThan(0)
+    expect(IDENTITY.pitch.match(/\./g) ?? []).toHaveLength(1)
+  })
+
+  /**
+   * Both branches must stay reachable. If `open` ever narrows to a literal type again, the
+   * booked case becomes dead code and the site can no longer say he is unavailable.
+   */
+  it('can express both availability states', () => {
+    expect(availabilityLabel({ ...AVAILABILITY, open: true })).toBe(AVAILABILITY.openLabel)
+    expect(availabilityLabel({ ...AVAILABILITY, open: false })).toBe(AVAILABILITY.closedLabel)
+    expect(availabilityLabel()).toBe(
+      AVAILABILITY.open ? AVAILABILITY.openLabel : AVAILABILITY.closedLabel,
+    )
   })
 })
