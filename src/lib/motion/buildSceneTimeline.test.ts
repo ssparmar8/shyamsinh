@@ -4,7 +4,7 @@ const fromTo = vi.fn().mockReturnThis()
 const to = vi.fn().mockReturnThis()
 vi.mock('gsap', () => ({ gsap: { timeline: vi.fn(() => ({ fromTo, to, kill: vi.fn() })) } }))
 
-import { buildSceneTimeline, holdFade } from './buildSceneTimeline'
+import { buildSceneTimeline, holdLift } from './buildSceneTimeline'
 import type { LayerReg } from '@/components/motion/SceneContext'
 
 function el(): HTMLElement {
@@ -43,18 +43,39 @@ describe('buildSceneTimeline', () => {
     expect(call).toBeTruthy()
     expect(call![1]).toHaveProperty('clipPath')
   })
+
+  /**
+   * Scroll must never dim anything. Text animated between two alphas is legible-but-washed
+   * for the whole tween, and under a scrub that is most of the time a beat is on screen — it
+   * reads as blurred text rather than as motion. Movement and clipping only, in every kind.
+   */
+  it('animates no opacity in any layer kind', () => {
+    fromTo.mockClear()
+    to.mockClear()
+    const kinds: LayerReg[] = [
+      { el: el(), kind: 'rise' },
+      { el: el(), kind: 'mask' },
+      { el: el(), kind: 'decode', text: 'X' },
+    ]
+    buildSceneTimeline(el(), kinds)
+    buildSceneTimeline(el(), []) // the un-annotated-beat default, too
+    const vars = [...fromTo.mock.calls, ...to.mock.calls].flatMap((c) => c.slice(1, 3))
+    expect(vars.length).toBeGreaterThan(0)
+    for (const v of vars) {
+      expect(v).not.toHaveProperty('autoAlpha')
+      expect(v).not.toHaveProperty('opacity')
+    }
+  })
 })
 
-describe('holdFade', () => {
+describe('holdLift', () => {
   it('is a no-op for the first 80% of the pin', () => {
-    expect(holdFade(0)).toEqual({ alpha: 1, y: 0 })
-    expect(holdFade(0.8)).toEqual({ alpha: 1, y: 0 })
+    expect(holdLift(0)).toEqual({ y: 0 })
+    expect(holdLift(0.8)).toEqual({ y: 0 })
   })
 
-  it('fades toward 0.5 alpha and lifts 16px by the end of the pin', () => {
-    expect(holdFade(1)).toEqual({ alpha: 0.5, y: -16 })
-    const mid = holdFade(0.9) // halfway through the tail
-    expect(mid.alpha).toBeCloseTo(0.75)
-    expect(mid.y).toBeCloseTo(-8)
+  it('lifts 16px by the end of the pin, without touching alpha', () => {
+    expect(holdLift(1)).toEqual({ y: -16 })
+    expect(holdLift(0.9).y).toBeCloseTo(-8) // halfway through the tail
   })
 })

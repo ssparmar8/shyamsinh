@@ -67,16 +67,26 @@ describe('Reveal', () => {
     expect(el.className).not.toContain('opacity-0')
   })
 
-  it('without reduced motion, the wrapper starts hidden, awaiting the scroll trigger', () => {
+  it('without reduced motion, the wrapper starts offset, awaiting the scroll trigger', () => {
     const { container } = render(
       <Reveal>
         <p>BEAT</p>
       </Reveal>,
     )
-    // Content is still present in the DOM even while visually hidden — only
-    // the styling gates visibility, never the content itself.
+    // Content is still present in the DOM even before the trigger fires — only
+    // the styling positions it, never gates the content itself.
     expect(screen.getByText('BEAT')).toBeInTheDocument()
     const el = container.firstElementChild as HTMLElement
-    expect(el.className).toContain('opacity-0')
+    expect(el.className).toContain('translate-y-2')
+  })
+
+  /** Scroll moves things; it never dims them. Dimmed text reads as blurred text. */
+  it('never applies an opacity class, revealed or not', () => {
+    const { container } = render(
+      <Reveal>
+        <p>BEAT</p>
+      </Reveal>,
+    )
+    expect((container.firstElementChild as HTMLElement).className).not.toMatch(/opacity-/)
   })
 })

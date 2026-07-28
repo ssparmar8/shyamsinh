@@ -82,6 +82,25 @@ body {
   animation: status-pulse 1.6s ease-in-out infinite alternate both;
 }
 
+/* Record status marker (LIVE / PRIVATE), drawn as a pseudo-element so no extra node lands in
+ * the record — see the comment in SystemRecord.tsx for why that matters. Inherits
+ * currentColor, so the chip's own text colour decides whether the dot reads as ink or dim.
+ * The hollow variant is for a system with nothing public to point at. */
+.status-mark::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 9999px;
+  vertical-align: middle;
+  background: currentColor;
+}
+.status-mark-hollow::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

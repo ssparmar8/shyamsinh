@@ -76,6 +76,44 @@ describe('SystemRecord', () => {
     expect(screen.getByText(/PRIVATE/)).toBeInTheDocument()
   })
 
+  it('shows the status of a LIVE system, not only of a private one', () => {
+    render(<SystemRecord system={live} index={0} />)
+    expect(screen.getByText('LIVE')).toBeInTheDocument()
+  })
+
+  /**
+   * A record must contain no aria-hidden nodes: that is the signal a reduced-motion e2e uses
+   * to assert the decode/type noise layers are absent. Decorations therefore go in CSS — a
+   * decorative node here would mask a real regression there.
+   */
+  it('draws the status marker without adding a node to the record', () => {
+    const { container } = render(<SystemRecord system={live} index={0} animate={false} />)
+    expect(container.querySelector('[aria-hidden="true"]')).toBeNull()
+    expect(container.querySelector('.status-mark')).toBeTruthy()
+  })
+
+  it('links to its own record page when given one', () => {
+    render(<SystemRecord system={live} index={0} recordHref="/systems/aiva" />)
+    expect(screen.getByRole('link', { name: /OPEN RECORD/ })).toHaveAttribute(
+      'href',
+      '/systems/aiva',
+    )
+  })
+
+  /** The record page IS the record; a card there linking to itself is a dead control. */
+  it('offers no record link when none is given', () => {
+    render(<SystemRecord system={live} index={0} animate={false} />)
+    expect(screen.queryByRole('link', { name: /OPEN RECORD/ })).not.toBeInTheDocument()
+  })
+
+  /** A PRIVATE system has nothing public to point at, but its case study is still readable. */
+  it('offers the record link even when there is no outbound url', () => {
+    render(<SystemRecord system={priv} index={1} recordHref="/systems/mof" />)
+    const links = screen.getAllByRole('link')
+    expect(links).toHaveLength(1)
+    expect(links[0]).toHaveAttribute('href', '/systems/mof')
+  })
+
   it('renders a 1-based padded record number', () => {
     render(<SystemRecord system={live} index={0} />)
     expect(screen.getByText(/RECORD 01/)).toBeInTheDocument()

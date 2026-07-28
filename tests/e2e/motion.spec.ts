@@ -43,6 +43,59 @@ test.describe('pinned scrub scenes (desktop)', () => {
   })
 })
 
+/**
+ * Scroll animates position, never opacity.
+ *
+ * Every layer used to ride an `autoAlpha: 0 → 1` ramp, and a released beat faded to 0.5 while
+ * it was still on screen — so under a scrub, where progress is tied to the wheel rather than
+ * to a short duration, text spent most of its time part-way through an alpha tween and read
+ * as blurred. Checking the computed opacity of everything actually on screen is the only
+ * assertion that holds for the whole rule: a class-name check would miss a gsap inline style,
+ * and a per-component check would miss the next component.
+ */
+test.describe('nothing dims while scrolling', () => {
+  for (const [label, viewport] of [
+    ['desktop (scrub + pin)', { width: 1280, height: 720 }],
+    ['narrow (one-shot reveal)', { width: 390, height: 844 }],
+  ] as const) {
+    test(`no on-screen element drops below full opacity — ${label}`, async ({ page }) => {
+      await page.setViewportSize(viewport)
+      await enter(page)
+
+      /**
+       * Two deliberate exemptions, both decoration rather than content, and neither driven
+       * by scroll:
+       *   - the typewriter's block caret, which is a cursor and is meant to sit faint;
+       *   - textless marker glyphs running their own CSS animation (the availability dot,
+       *     the timeline's current-node dot), which breathe like a status light.
+       * Anything carrying words is held to full opacity, always.
+       */
+      const dimmed = async () =>
+        page.evaluate(() =>
+          [...document.querySelectorAll('main *')]
+            .filter((el) => {
+              const r = el.getBoundingClientRect()
+              if (!r.height || r.bottom < 0 || r.top > innerHeight) return false
+              const text = el.textContent?.trim() ?? ''
+              if (text === '▍') return false
+              const cs = getComputedStyle(el)
+              if (text === '' && cs.animationName !== 'none') return false
+              return cs.visibility === 'hidden' || parseFloat(cs.opacity) < 1
+            })
+            .map((el) => `${el.tagName}.${String(el.className).slice(0, 40)}`),
+        )
+
+      const offenders: string[] = []
+      for (let i = 0; i < 40; i++) {
+        await page.mouse.wheel(0, 240)
+        await page.waitForTimeout(70)
+        offenders.push(...(await dimmed()))
+      }
+      expect([...new Set(offenders)]).toEqual([])
+    })
+  }
+})
+
 test.describe('reduced motion: full content, no pinning', () => {
   test.use({ contextOptions: { reducedMotion: 'reduce' } })
 

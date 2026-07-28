@@ -59,7 +59,7 @@ describe('Scene', () => {
     expect(container.querySelector('p')).toBe(container.firstElementChild)
   })
 
-  it('reveal mode starts hidden awaiting the one-shot trigger', () => {
+  it('reveal mode starts offset awaiting the one-shot trigger, and never dimmed', () => {
     setEnv('reveal')
     const { container } = render(
       <Scene>
@@ -67,6 +67,8 @@ describe('Scene', () => {
       </Scene>,
     )
     const el = container.firstElementChild as HTMLElement
-    expect(el.className).toContain('opacity-0')
+    expect(el.className).toContain('translate-y-2')
+    // Scroll motion is movement, never opacity — dimmed text reads as blurred text.
+    expect(el.className).not.toContain('opacity-0')
   })
 })

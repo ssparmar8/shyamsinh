@@ -1,6 +1,7 @@
 import type { System } from '@/content/schema'
 import { ScrambleTextAnimated } from '@/components/text/ScrambleTextAnimated'
 import { TypeOut } from '@/components/text/TypeOut'
+import { MagneticLink } from '@/components/motion/MagneticLink'
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 const NAME = 'mt-3 font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]'
@@ -11,6 +12,7 @@ export function SystemRecord({
   index,
   seedBase = 0,
   animate = true,
+  recordHref,
 }: {
   system: System
   index: number
@@ -23,6 +25,11 @@ export function SystemRecord({
    * but forced regardless of the visitor's motion preference.
    */
   animate?: boolean
+  /**
+   * Where this record's own page lives. Omitted on `/systems/[slug]` itself — that page IS
+   * the record, and a card linking to the page it is already on is a dead control.
+   */
+  recordHref?: string
 }) {
   const num = String(index + 1).padStart(2, '0')
   const host = system.url ? new URL(system.url).hostname.replace(/^www\./, '') : null
@@ -30,7 +37,26 @@ export function SystemRecord({
 
   return (
     <article className="relative border border-[var(--color-border)] bg-[var(--color-panel)]/60 px-7 py-7 md:px-8">
-      <div className={LABEL}>RECORD {num}</div>
+      {/*
+        `status` was carried on every record in the data and rendered nowhere but the private
+        systems' footer line, so a LIVE system said nothing about being live. Paired with the
+        record number it also gives the card a header rather than a lone dangling label.
+
+        The marker is a CSS pseudo-element, NOT a <span aria-hidden>: a reduced-motion e2e
+        asserts a record contains zero aria-hidden nodes, which is how "no decode noise layer"
+        is detected. A decorative dot in the DOM would make a real regression there
+        indistinguishable from a bullet.
+      */}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <div className={LABEL}>RECORD {num}</div>
+        <div
+          className={`${LABEL} status-mark ${
+            system.status === 'LIVE' ? 'text-[var(--color-ink)]' : 'status-mark-hollow'
+          }`}
+        >
+          {system.status}
+        </div>
+      </div>
 
       {animate ? (
         <ScrambleTextAnimated as="h2" text={system.name} seed={seedBase * 10 + 1} className={NAME} />
@@ -78,7 +104,7 @@ export function SystemRecord({
         ))}
       </ul>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
         {system.url && host ? (
           <a
             href={system.url}
@@ -89,7 +115,20 @@ export function SystemRecord({
             ▸ {host}
           </a>
         ) : (
-          <span className={LABEL}>STATUS: PRIVATE · NOT PUBLICLY LINKABLE</span>
+          // The header chip already says PRIVATE; this says why there is nothing to click.
+          <span className={LABEL}>NOT PUBLICLY LINKABLE</span>
+        )}
+        {/*
+          The case study (problem → decisions → delivered) lives only on the record page, and
+          the home scroll had no route to it: the archive rows below linked to their records
+          while the six FEATURED systems — the strongest work on the site — did not.
+        */}
+        {recordHref && (
+          <MagneticLink
+            href={recordHref}
+            text="▸ OPEN RECORD"
+            className={`${LABEL} hover:text-[var(--color-ink)]`}
+          />
         )}
       </div>
     </article>

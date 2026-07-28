@@ -11,11 +11,17 @@ type Props = {
 }
 
 /**
- * Wraps a server-rendered section so it fades and slides up as it scrolls
- * into view. See useReveal.ts for the ScrollTrigger + Lenis wiring.
+ * Wraps a server-rendered section so it slides up as it scrolls into view.
+ * See useReveal.ts for the ScrollTrigger + Lenis wiring.
+ *
+ * Movement only — it does NOT fade. The opacity ramp it used to carry meant a
+ * section spent its whole reveal legible-but-dim, which read as blur on text;
+ * the same rule now holds across the scrub path (see buildSceneTimeline.ts).
+ * The reduced-motion guarantees below are unchanged and still worth their
+ * strictness: they are about never gating content, not about the fade.
  *
  * Children are ALWAYS rendered, in both branches below — this only ever adds
- * opacity/transform styling around already-present content, the same
+ * transform styling around already-present content, the same
  * contract EntryOverlay already holds for the whole page ("Children are
  * ALWAYS rendered — see the first test"). A no-JS visitor, a crawler, and a
  * reduced-motion user all get the full section from first paint. Because
@@ -28,12 +34,12 @@ type Props = {
  * assumed: see this task's report.
  *
  * Reduced motion renders children with NO wrapper at all: no div, no ref, no
- * ScrollTrigger, no opacity/transform class ever applied — not even for one
- * frame. This does not rely on globals.css's blanket
- * `transition-duration: 0.01ms !important` to *finish* a hidden→visible
- * transition instantly; that would still mean `opacity-0` was briefly the
- * real state. Skipping the class outright, via useReveal's `reduced` branch,
- * is the stronger guarantee non-negotiable #2 asks for.
+ * ScrollTrigger, no transform class ever applied — not even for one frame.
+ * This does not rely on globals.css's blanket
+ * `transition-duration: 0.01ms !important` to *finish* an offset→settled
+ * transition instantly; that would still mean the offset was briefly the real
+ * state. Skipping the class outright, via useReveal's `reduced` branch, is the
+ * stronger guarantee non-negotiable #2 asks for.
  */
 export function Reveal({ children, delayMs = 0 }: Props) {
   const reduced = usePrefersReducedMotion()
@@ -48,8 +54,7 @@ export function Reveal({ children, delayMs = 0 }: Props) {
       ref={ref}
       style={delayMs ? { transitionDelay: `${delayMs}ms` } : undefined}
       className={
-        'transition duration-700 ease-out ' +
-        (revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2')
+        'transition duration-700 ease-out ' + (revealed ? 'translate-y-0' : 'translate-y-2')
       }
     >
       {children}

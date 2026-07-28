@@ -5,7 +5,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSceneMode } from '@/lib/motion/useSceneMode'
 import { useReveal } from '@/lib/motion/useReveal'
-import { buildSceneTimeline, holdFade } from '@/lib/motion/buildSceneTimeline'
+import { buildSceneTimeline, holdLift } from '@/lib/motion/buildSceneTimeline'
 import { SceneContext, type LayerReg, type SceneCtx } from './SceneContext'
 
 if (typeof window !== 'undefined') {
@@ -75,13 +75,13 @@ export function Scene({ children, length = 1, className }: Props) {
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
-          // Settle the beat out over the last of the pin (transform/opacity only — never
-          // layout, so the pin can't jump). `target` is the inner content; the assemble
-          // timeline animates the beat's layer children (or, for an unannotated beat, the
-          // root itself as a one-shot reveal that finishes before this tail begins), so the
-          // two are scroll-sequential and don't fight.
-          const { alpha, y } = holdFade(self.progress)
-          gsap.set(target, { autoAlpha: alpha, y })
+          // Settle the beat out over the last of the pin (transform only — never layout, so
+          // the pin can't jump, and never opacity, so the section a visitor is still reading
+          // never dims under them). `target` is the inner content; the assemble timeline
+          // animates the beat's layer children (or, for an unannotated beat, the root itself
+          // as a one-shot reveal that finishes before this tail begins), so the two are
+          // scroll-sequential and don't fight.
+          gsap.set(target, holdLift(self.progress))
         },
       })
 
@@ -104,11 +104,13 @@ export function Scene({ children, length = 1, className }: Props) {
 
   if (mode === 'reveal') {
     return (
+      // Slide only, never a fade — same rule as the scrub path: a beat arriving on a touch
+      // screen must never be legible-but-dim, it either has not moved into place yet or it
+      // is fully readable.
       <div
         ref={revealRef}
         className={
-          'transition duration-700 ease-out ' +
-          (revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2')
+          'transition duration-700 ease-out ' + (revealed ? 'translate-y-0' : 'translate-y-2')
         }
       >
         {children}

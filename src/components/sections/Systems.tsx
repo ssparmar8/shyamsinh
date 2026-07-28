@@ -19,7 +19,15 @@ export function Systems() {
       <div className="mt-10 space-y-8">
         {getFeatured().map((s, i) => (
           <Rise key={s.slug}>
-            <SystemRecord system={s} index={recordNumber(s.slug) - 1} seedBase={i + 1} />
+            {/* recordHref: the home scroll is where a visitor meets these six, so it is where
+                the route into each case study has to be. The record page itself passes none —
+                see the prop's doc comment. */}
+            <SystemRecord
+              system={s}
+              index={recordNumber(s.slug) - 1}
+              seedBase={i + 1}
+              recordHref={`/systems/${s.slug}`}
+            />
           </Rise>
         ))}
       </div>
