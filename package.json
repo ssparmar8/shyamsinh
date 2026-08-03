@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "vitest run src/content --silent",
     "build": "next build",
+    "postbuild": "node scripts/check-no-private-hosts.mjs && node scripts/check-og-image.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",

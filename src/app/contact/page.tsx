@@ -2,11 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IDENTITY, AVAILABILITY, availabilityLabel } from '@/content/identity'
 import { HudFrame } from '@/components/hud/HudFrame'
+import { pageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+// Deliberately says nothing about availability: AVAILABILITY.open is a one-word edit
+// (identity.ts) and a description baking in "available for contract" would keep claiming it
+// in search results long after he went booked.
+export const metadata: Metadata = pageMetadata({
   title: 'Uplink',
-  description: `Contact ${IDENTITY.name}.`,
-}
+  description: `Contact ${IDENTITY.name}, ${IDENTITY.title} — email, phone, and profiles. Contract enquiries for voice agents, LLM pipelines, and backend systems.`,
+  path: '/contact/',
+})
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 /** Kept in step with the Uplink beat's ROW — this page and that beat are the same content. */
@@ -31,7 +36,27 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <dl className="mt-6 border-t border-[var(--color-border)]">
+        {/*
+          The page shipped with no heading element at all — not a small one, none. Follows
+          the home hero's shape (Identity.tsx): section label, then the h1 under it.
+
+          The h1 says "CONTACT SHYAMSINH PARMAR" rather than "UPLINK" because a heading is
+          the strongest on-page signal there is, and `// UPLINK` tells a search engine
+          nothing about who this page is for. The HUD label above keeps the site's voice.
+        */}
+        <h1 className="mt-4 font-mono text-2xl tracking-[var(--tracking-wide)] text-[var(--color-ink)] md:text-3xl">
+          CONTACT {IDENTITY.name.toUpperCase()}
+        </h1>
+
+        {/* Prose measure and near-zero tracking, same rule as the hero pitch: tracking-hud is
+            a label setting and stops being readable at sentence length. Says "AI developer"
+            in his own words — the site's title is "AI & Backend Architect", which is the
+            better positioning term and the one nobody types into a search box. */}
+        <p className="mt-5 max-w-xl font-mono text-sm leading-relaxed tracking-[0.02em] text-[var(--color-dim)]">
+          {`AI developer and backend architect based in ${IDENTITY.location}. Contract enquiries for voice agents, LLM pipelines, and the backends that carry them.`}
+        </p>
+
+        <dl className="mt-8 border-t border-[var(--color-border)]">
           <div className={ROW}>
             <dt className={LABEL}>EMAIL</dt>
             <dd>

@@ -13,6 +13,7 @@ export function SystemRecord({
   seedBase = 0,
   animate = true,
   recordHref,
+  headingLevel = 2,
 }: {
   system: System
   index: number
@@ -30,7 +31,20 @@ export function SystemRecord({
    * the record, and a card linking to the page it is already on is a dead control.
    */
   recordHref?: string
+  /**
+   * The heading level the record's name renders at. Defaults to 2, because the home page
+   * stacks six of these under the `NODE: SYSTEMS` h2 and a card is a subsection there.
+   *
+   * `/systems/[slug]` passes 1: on that route the record IS the page, and it shipped with
+   * no h1 at all — 18 pages, the most specific content on the site, each headless. This is
+   * a prop rather than a hardcoded h1 precisely because the same component renders in both
+   * places; promoting it unconditionally would give the home page six h1 elements, which is
+   * a worse document outline than the one it replaced.
+   */
+  headingLevel?: 1 | 2
 }) {
+  // `const` and capitalised so JSX reads it as a component rather than the literal tag <Heading>.
+  const Heading = `h${headingLevel}` as const
   const num = String(index + 1).padStart(2, '0')
   const host = system.url ? new URL(system.url).hostname.replace(/^www\./, '') : null
   const domainText = `${system.domain} · ${system.region}`
@@ -59,9 +73,14 @@ export function SystemRecord({
       </div>
 
       {animate ? (
-        <ScrambleTextAnimated as="h2" text={system.name} seed={seedBase * 10 + 1} className={NAME} />
+        <ScrambleTextAnimated
+          as={Heading}
+          text={system.name}
+          seed={seedBase * 10 + 1}
+          className={NAME}
+        />
       ) : (
-        <h2 className={NAME}>{system.name}</h2>
+        <Heading className={NAME}>{system.name}</Heading>
       )}
 
       {/*

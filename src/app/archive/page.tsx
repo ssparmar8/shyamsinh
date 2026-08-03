@@ -3,11 +3,17 @@ import Link from 'next/link'
 import { getFeatured, getArchive, countSystems, countSectors, recordNumber } from '@/content'
 import { HudFrame } from '@/components/hud/HudFrame'
 import type { System } from '@/content/schema'
+import { pageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+// Description lengthened from "Every system, by year." to land in the 140-160 char band
+// SEO_RULES.md §6 asks for — a 22-char description gives a search result nothing to show.
+// The claim stays inside what the archive backs; see IDENTITY.pitch for the same rule.
+export const metadata: Metadata = pageMetadata({
   title: 'Archive Index',
-  description: 'Every system, by year.',
-}
+  description:
+    'Every system, by year — voice agents, LLM pipelines, and the backends behind them, built for teams in healthcare, legal, and compliance.',
+  path: '/archive/',
+})
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 

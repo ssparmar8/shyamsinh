@@ -99,6 +99,20 @@ export const SystemSchema = z
      * describes extraction + citation, NOT the "drafting" the source docs wrongly
      * claimed and this file already corrected (see the note on that record).
      */
+    /**
+     * A hand-written meta description, used ONLY when `summary` does not fit the snippet.
+     *
+     * The summary is page copy: it is allowed to be as long as the work needs. A search
+     * result is not — past ~160 characters Google simply stops rendering, so AIVA's 212-char
+     * summary was published with its last clause invisible. This field exists so the fix is
+     * a deliberate, reviewable sentence rather than an algorithm guessing where to cut; a
+     * machine trim of that summary lands mid-word at "per-conversation analy…".
+     *
+     * The bounds are enforced, not advisory. An override that is itself too long defeats the
+     * only reason to write one, and one under 120 wastes the space it was added to fill. Say
+     * nothing here and the summary is used as-is — which is right for 17 of 18 records.
+     */
+    metaDescription: z.string().min(120).max(160).optional(),
     caseStudy: z
       .object({
         problem: z.string().min(1),
