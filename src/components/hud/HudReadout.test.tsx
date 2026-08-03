@@ -65,7 +65,7 @@ describe('HudReadout', () => {
     })
   })
 
-  it('does not attempt to setState after unmount when the geo lookup resolves late', async () => {
+  it('does not throw when the geo lookup resolves after unmount', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     let resolveFetch: (value: unknown) => void = () => {}
     vi.stubGlobal(

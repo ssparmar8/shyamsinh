@@ -96,6 +96,9 @@ function useVisitorNetwork(): string | null {
   const [line, setLine] = useState<string | null>(null)
 
   useEffect(() => {
+    // Manually verified: removing this guard causes no test failure and no console
+    // warning in React 19/jsdom — this flag protects against a stale setState on
+    // unmount that isn't practically unit-testable here, not a fully-covered invariant.
     let cancelled = false
     fetch('https://ipwho.is/')
       .then((res) => res.json())
