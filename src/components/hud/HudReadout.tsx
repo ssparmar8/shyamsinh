@@ -55,7 +55,6 @@ export function HudReadout() {
   const now = useClock(!reduced)
   return (
     <div aria-hidden="true" className="pointer-events-none fixed bottom-6 left-8 z-20 hidden sm:block">
-      <div className={LINE}>NEURAL_NODE · LINK STABLE</div>
       <div className={LINE}>FACILITY // ARCHIVE_DAEMON · PID 4182</div>
       <div className={LINE}>{now}</div>
     </div>
