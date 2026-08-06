@@ -1,12 +1,31 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getFeatured, getArchive, countSystems, countSectors, recordNumber } from '@/content'
+import { getFeatured, getArchive, countSystems, countSectors, recordNumber, SYSTEMS } from '@/content'
 import { HudFrame } from '@/components/hud/HudFrame'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { breadcrumbJsonLd, canonicalUrl, clampDescription, collectionJsonLd } from '@/lib/seo'
 import type { System } from '@/content/schema'
+
+/**
+ * Counts come from the data, so the description can never advertise a number of systems the
+ * archive does not contain. 'Every system, by year.' was 22 characters — far under the ~150
+ * a result will display, and it named none of the terms someone would search for.
+ */
+const DESCRIPTION = clampDescription(
+  `Every system Shyamsinh Parmar has shipped: ${countSystems()} production AI and backend projects across ` +
+    `${countSectors()} sectors — healthcare, legal, compliance, commerce and more, by year.`,
+)
 
 export const metadata: Metadata = {
   title: 'Archive Index',
-  description: 'Every system, by year.',
+  description: DESCRIPTION,
+  alternates: { canonical: canonicalUrl('/archive') },
+  openGraph: {
+    type: 'website',
+    title: `Archive Index — ${countSystems()} systems`,
+    description: DESCRIPTION,
+    url: canonicalUrl('/archive'),
+  },
 }
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
@@ -55,6 +74,22 @@ function Row({ system }: { system: System }) {
 export default function ArchivePage() {
   return (
     <HudFrame>
+      {/* The archive had no structured data at all, so its 18 records read to a crawler as
+          18 unrelated pages rather than one catalogue with an owner. */}
+      <JsonLd
+        data={collectionJsonLd(
+          SYSTEMS.map((s) => ({ name: s.name, slug: s.slug })),
+          '/archive',
+          'Archive Index',
+          DESCRIPTION,
+        )}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Archive Index', path: '/archive' },
+        ])}
+      />
       <main className="mx-auto max-w-3xl px-6 pt-24 pb-24">
         <h1 className="font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]">
           ARCHIVE INDEX

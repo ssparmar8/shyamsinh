@@ -12,6 +12,7 @@ export function SystemRecord({
   index,
   seedBase = 0,
   animate = true,
+  as: NameTag = 'h2',
   recordHref,
 }: {
   system: System
@@ -25,6 +26,16 @@ export function SystemRecord({
    * but forced regardless of the visitor's motion preference.
    */
   animate?: boolean
+  /**
+   * The heading level for the system name.
+   *
+   * On `/systems/[slug]` this record IS the page, so its name must be the h1 — all 18 record
+   * pages previously rendered an h2 as their most important heading and no h1 at all, which
+   * leaves a crawler to guess the subject of the page from the <title> alone. On the home
+   * scroll the same component is one of six records under the page's real h1, where h2 is
+   * correct. Semantics follow position, so neither context has to compromise.
+   */
+  as?: 'h1' | 'h2'
   /**
    * Where this record's own page lives. Omitted on `/systems/[slug]` itself — that page IS
    * the record, and a card linking to the page it is already on is a dead control.
@@ -59,9 +70,14 @@ export function SystemRecord({
       </div>
 
       {animate ? (
-        <ScrambleTextAnimated as="h2" text={system.name} seed={seedBase * 10 + 1} className={NAME} />
+        <ScrambleTextAnimated
+          as={NameTag}
+          text={system.name}
+          seed={seedBase * 10 + 1}
+          className={NAME}
+        />
       ) : (
-        <h2 className={NAME}>{system.name}</h2>
+        <NameTag className={NAME}>{system.name}</NameTag>
       )}
 
       {/*

@@ -2,10 +2,30 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IDENTITY, AVAILABILITY, availabilityLabel } from '@/content/identity'
 import { HudFrame } from '@/components/hud/HudFrame'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { breadcrumbJsonLd, canonicalUrl, clampDescription, contactJsonLd } from '@/lib/seo'
+
+/**
+ * 'Uplink' is the site's own word for this page and means nothing to someone searching for
+ * an AI developer to hire, so the TITLE carries the site language while the DESCRIPTION
+ * carries the words a person actually types. `Contact ${name}.` was 26 characters and gave a
+ * result listing nothing to read.
+ */
+const DESCRIPTION = clampDescription(
+  `Hire ${IDENTITY.name}, ${IDENTITY.title} — available for freelance and contract work on AI, ` +
+    `voice agent and backend projects. Remote from ${IDENTITY.location}.`,
+)
 
 export const metadata: Metadata = {
-  title: 'Uplink',
-  description: `Contact ${IDENTITY.name}.`,
+  title: 'Contact',
+  description: DESCRIPTION,
+  alternates: { canonical: canonicalUrl('/contact') },
+  openGraph: {
+    type: 'website',
+    title: `Contact ${IDENTITY.name}`,
+    description: DESCRIPTION,
+    url: canonicalUrl('/contact'),
+  },
 }
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
@@ -16,7 +36,22 @@ const ROW =
 export default function ContactPage() {
   return (
     <HudFrame>
+      <JsonLd data={contactJsonLd()} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Contact', path: '/contact' },
+        ])}
+      />
       <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-24">
+        {/* A real <h1>. This page had no heading element at all, so crawlers and screen
+            readers met it as an untitled slab of contact details.
+
+            The heading holds ONLY the words, and the `// UPLINK` wordmark stays a separate
+            element beside it. Nesting the two inside one h1 concatenated their text into
+            "// UPLINKContact Shyamsinh Parmar" — aria-hidden keeps that out of a screen
+            reader, but a crawler reads text content and would have indexed the mangled form. */}
+        <h1 className="sr-only">{`Contact ${IDENTITY.name}`}</h1>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
           <div className={LABEL}>{'// UPLINK'}</div>
           {/* Whether he is taking work is the first thing this page has to answer. */}

@@ -11,10 +11,17 @@ import { Stack } from '@/components/sections/Stack'
 import { Telemetry } from '@/components/sections/Telemetry'
 import { ArchiveIndex } from '@/components/sections/ArchiveIndex'
 import { Uplink } from '@/components/sections/Uplink'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { personJsonLd, webSiteJsonLd } from '@/lib/seo'
 
 export default function Home() {
   return (
     <>
+      {/* The entity graph. Person and WebSite are linked by @id rather than repeated, so a
+          crawler reads one identity that owns one site — and every other page's structured
+          data references these same two @ids instead of restating them. */}
+      <JsonLd data={personJsonLd()} />
+      <JsonLd data={webSiteJsonLd()} />
       <Constellation />
       <SmoothScroll />
       <CursorTrail />
