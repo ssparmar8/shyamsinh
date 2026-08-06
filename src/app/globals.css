@@ -56,6 +56,27 @@ body {
   color: var(--color-ink);
 }
 
+/* Scrollbar themed to match the HUD palette instead of the OS default. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ghost) var(--color-panel);
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-panel);
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-ghost);
+  border-radius: 9999px;
+  border: 2px solid var(--color-panel);
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-dim);
+}
+
 /* HUD corner traces draw themselves on load; the reduced-motion rule below makes
  * that near-instant, so a reduced-motion visitor just sees them already present. */
 @keyframes hud-trace {

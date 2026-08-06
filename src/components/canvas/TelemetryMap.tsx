@@ -2,7 +2,17 @@
 
 import { useEffect, useRef } from 'react'
 import { landDots, lonLatToXY, cellToXY } from '@/lib/canvas/worldDots'
-import { getTelemetryNodes, type TelemetryNode } from '@/content'
+/**
+ * TYPE-ONLY, and it must stay that way. A value import from '@/content' pulls systems.ts,
+ * which pulls schema.ts — and schema.ts carries both zod and PRIVATE_HOSTS, the blocklist
+ * naming a client's private UAT host. This file is `'use client'`, so anything it imports at
+ * runtime is published as readable JavaScript: that is exactly how the host that constant
+ * exists to suppress ended up in a public chunk. The nodes arrive as props instead.
+ *
+ * `npm run build` greps the output for those hosts (scripts/check-no-private-hosts.mjs), so
+ * re-introducing a value import here fails the build rather than shipping quietly.
+ */
+import type { TelemetryNode } from '@/content'
 import { useRafLoop } from '@/lib/canvas/useRafLoop'
 import { usePrefersReducedMotion } from '@/lib/motion/usePrefersReducedMotion'
 
@@ -143,7 +153,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, s: MapState) {
  * and a reduced-motion user all get the facts. Reduced motion still renders the full
  * map — it just draws once (no pulse, no rotation) with the rAF loop disabled.
  */
-export function TelemetryMap() {
+export function TelemetryMap({ home, clients }: { home: TelemetryNode; clients: TelemetryNode[] }) {
   const reduced = usePrefersReducedMotion()
   const holderRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -153,7 +163,6 @@ export function TelemetryMap() {
     const canvas = canvasRef.current
     const holder = holderRef.current
     if (!canvas || !holder) return
-    const { home, clients } = getTelemetryNodes()
     const base = document.createElement('canvas')
 
     const resize = () => {
@@ -176,7 +185,10 @@ export function TelemetryMap() {
     resize()
     addEventListener('resize', resize)
     return () => removeEventListener('resize', resize)
-  }, [])
+    // `home`/`clients` come from a server component over static build output — they are the
+    // same values for the life of the page, so they belong in the deps for correctness but
+    // can never actually re-fire this effect.
+  }, [home, clients])
 
   useRafLoop((dt) => {
     const s = stateRef.current

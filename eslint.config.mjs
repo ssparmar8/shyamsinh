@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Not application code: infra/ holds CloudFront Functions, which run on the
+    // cloudfront-js-2.0 runtime and expose `handler` to the platform rather than to any
+    // caller in this repo. Linting them as Next source only ever reports that.
+    "infra/**",
   ]),
 ]);
 

@@ -100,19 +100,30 @@ export function sectorsCovered(): string[] {
   return [...new Set(SYSTEMS.map((s) => s.sector))].sort()
 }
 
-/** Profile URLs, for `sameAs` — the strongest entity signal a personal site can send. */
+/**
+ * Profile URLs, for `sameAs` — the strongest entity signal a personal site can send.
+ *
+ * Filtered to `sameAs: true` rows only (see the field note on IDENTITY.links): an
+ * organisation account or an unconfirmed profile asserted here does not fail quietly, it
+ * actively teaches a search engine the wrong entity.
+ */
 function profileUrls(): string[] {
-  return IDENTITY.links.map((l) => l.href)
+  return IDENTITY.links.filter((l) => l.sameAs).map((l) => l.href)
 }
 
 type JsonLd = Record<string, unknown>
 
 /**
  * The Person entity. `sameAs` links this site to the profiles that already carry reputation
- * (Upwork, GitHub, Fiverr, LinkedIn), which is how a search engine resolves "Shyamsinh
- * Parmar the AI architect" to one identity rather than to an unknown string.
+ * (Upwork, GitHub, Fiverr — see the `sameAs` note on IDENTITY.links for who is excluded and
+ * why), which is how a search engine resolves "Shyamsinh Parmar the AI architect" to one
+ * identity rather than to an unknown string.
  */
 export function personJsonLd(): JsonLd {
+  // IDENTITY.location is "City, Region, Country"; identity.test.ts pins that shape so a
+  // reformat fails a test instead of silently emitting a blank locality here.
+  const [addressLocality, addressRegion] = IDENTITY.location.split(',').map((p) => p.trim())
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -125,7 +136,8 @@ export function personJsonLd(): JsonLd {
     telephone: IDENTITY.phone.replace(/\s/g, ''),
     address: {
       '@type': 'PostalAddress',
-      addressRegion: 'Gujarat',
+      addressLocality,
+      addressRegion,
       addressCountry: IDENTITY.locationCode,
     },
     worksFor: {

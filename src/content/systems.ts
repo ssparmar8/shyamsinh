@@ -20,6 +20,14 @@ export const SYSTEMS: System[] = [
     stack: ['Twilio', 'ElevenLabs', 'OpenAI', 'Node.js'],
     summary:
       'A voice-AI platform for deploying agents and embeddable chat widgets across web, phone, and apps — with full call recordings, logs, and per-conversation analytics. Serves Indian small businesses in 12+ languages.',
+    /**
+     * The summary above is 212 characters, so Google cut it mid-clause and the reach claim —
+     * the most persuasive thing on the record — never rendered. This keeps the opening
+     * definition and that claim, and drops only the middle feature list, which is the part a
+     * reader gets from the page itself. 146 characters, and every word is from the summary.
+     */
+    metaDescription:
+      'A voice-AI platform for deploying agents and embeddable chat widgets across web, phone, and apps. Serves Indian small businesses in 12+ languages.',
     url: 'https://aivachat.io/',
     status: 'LIVE',
     featured: true,

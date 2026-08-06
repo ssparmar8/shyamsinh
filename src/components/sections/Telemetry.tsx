@@ -32,8 +32,12 @@ export function Telemetry() {
         CLIENT WORK DELIVERED ACROSS {countClientRegions()} REGIONS
       </MaskWipe>
 
+      {/* Nodes passed down rather than fetched inside the map. TelemetryMap is a client
+          component, so importing '@/content' there published schema.ts — zod plus the
+          PRIVATE_HOSTS blocklist — into a browser chunk. This section is a server component
+          and already has the data. */}
       <MaskWipe>
-        <TelemetryMap />
+        <TelemetryMap home={home} clients={clients} />
       </MaskWipe>
 
       <Rise as="dl" className="mt-6 border-t border-[var(--color-border)]">

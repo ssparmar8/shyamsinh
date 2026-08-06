@@ -29,6 +29,55 @@ export const getAllSlugs = (): string[] => SYSTEMS.map((s) => s.slug)
 export const recordNumber = (slug: string): number =>
   SYSTEMS.findIndex((s) => s.slug === slug) + 1
 
+/**
+ * How many other records to offer from a record page.
+ *
+ * SEO_RULES.md §12 asks for 5-10 internal links per page; a record page carried exactly one
+ * (the back-link to the index), so 18 of the site's most specific pages were crawlable dead
+ * ends that linked to nothing and were linked to only from /archive. Five related plus the
+ * back-link lands in the band.
+ */
+export const RELATED_COUNT = 5
+
+/**
+ * Records related to `slug`, best match first.
+ *
+ * Relatedness is derived, never hand-curated: a static "see also" list is one more thing to
+ * update when a system is added, and the one nobody remembers to.
+ *
+ * Sector outweighs any amount of shared tooling, because two healthcare systems are related
+ * in the way a reader means even when they share no libraries, while "both use Node.js" says
+ * almost nothing — half the archive uses Node.js. Hence sector 3, each shared stack entry 1.
+ *
+ * The list is always filled to `limit`, topping up with the most recent unrelated records if
+ * the scoring runs dry. A page that shows two links because its sector happens to be sparse
+ * is the dead-end problem again, just smaller.
+ *
+ * Ordering is fully deterministic — score, then year, then the canonical archive position —
+ * so the same input always produces the same HTML. A tie broken by sort instability would
+ * make every build emit a different page and every deploy invalidate pages that did not
+ * change.
+ */
+export const getRelated = (slug: string, limit: number = RELATED_COUNT): System[] => {
+  const self = getBySlug(slug)
+  if (!self) return []
+
+  const others = SYSTEMS.filter((s) => s.slug !== slug)
+  const stack = new Set(self.stack)
+
+  const score = (s: System): number =>
+    (s.sector === self.sector ? 3 : 0) + s.stack.filter((t) => stack.has(t)).length
+
+  return [...others]
+    .sort(
+      (a, b) =>
+        score(b) - score(a) ||
+        b.year - a.year ||
+        SYSTEMS.indexOf(a) - SYSTEMS.indexOf(b),
+    )
+    .slice(0, limit)
+}
+
 export const countSystems = (): number => SYSTEMS.length
 
 export const countSectors = (): number => new Set(SYSTEMS.map((s) => s.sector)).size

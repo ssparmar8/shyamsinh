@@ -70,7 +70,7 @@ describe('structured data', () => {
     expect(person['@type']).toBe('Person')
     expect(person.name).toBe(IDENTITY.name)
     expect(person.url).toBe(SITE_URL)
-    expect(person.sameAs).toEqual(IDENTITY.links.map((l) => l.href))
+    expect(person.sameAs).toEqual(IDENTITY.links.filter((l) => l.sameAs).map((l) => l.href))
   })
 
   /**
