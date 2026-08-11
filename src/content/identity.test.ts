@@ -48,7 +48,7 @@ describe('IDENTITY', () => {
   })
 
   /**
-   * lib/jsonLd.ts splits this into addressLocality/addressRegion. Reformatting it to
+   * lib/seo.ts splits this into addressLocality/addressRegion. Reformatting it to
    * "Rajkot (Gujarat)" or back to "Gujarat, India" would not throw — it would quietly emit a
    * Person graph with the region in the locality slot, or an undefined region, and the only
    * symptom would be local search results that never arrive.

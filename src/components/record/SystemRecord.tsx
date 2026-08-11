@@ -12,8 +12,8 @@ export function SystemRecord({
   index,
   seedBase = 0,
   animate = true,
+  as: NameTag = 'h2',
   recordHref,
-  headingLevel = 2,
 }: {
   system: System
   index: number
@@ -27,24 +27,21 @@ export function SystemRecord({
    */
   animate?: boolean
   /**
+   * The heading level for the system name.
+   *
+   * On `/systems/[slug]` this record IS the page, so its name must be the h1 — all 18 record
+   * pages previously rendered an h2 as their most important heading and no h1 at all, which
+   * leaves a crawler to guess the subject of the page from the <title> alone. On the home
+   * scroll the same component is one of six records under the page's real h1, where h2 is
+   * correct. Semantics follow position, so neither context has to compromise.
+   */
+  as?: 'h1' | 'h2'
+  /**
    * Where this record's own page lives. Omitted on `/systems/[slug]` itself — that page IS
    * the record, and a card linking to the page it is already on is a dead control.
    */
   recordHref?: string
-  /**
-   * The heading level the record's name renders at. Defaults to 2, because the home page
-   * stacks six of these under the `NODE: SYSTEMS` h2 and a card is a subsection there.
-   *
-   * `/systems/[slug]` passes 1: on that route the record IS the page, and it shipped with
-   * no h1 at all — 18 pages, the most specific content on the site, each headless. This is
-   * a prop rather than a hardcoded h1 precisely because the same component renders in both
-   * places; promoting it unconditionally would give the home page six h1 elements, which is
-   * a worse document outline than the one it replaced.
-   */
-  headingLevel?: 1 | 2
 }) {
-  // `const` and capitalised so JSX reads it as a component rather than the literal tag <Heading>.
-  const Heading = `h${headingLevel}` as const
   const num = String(index + 1).padStart(2, '0')
   const host = system.url ? new URL(system.url).hostname.replace(/^www\./, '') : null
   const domainText = `${system.domain} · ${system.region}`
@@ -74,13 +71,13 @@ export function SystemRecord({
 
       {animate ? (
         <ScrambleTextAnimated
-          as={Heading}
+          as={NameTag}
           text={system.name}
           seed={seedBase * 10 + 1}
           className={NAME}
         />
       ) : (
-        <Heading className={NAME}>{system.name}</Heading>
+        <NameTag className={NAME}>{system.name}</NameTag>
       )}
 
       {/*

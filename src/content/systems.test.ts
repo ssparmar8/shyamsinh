@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { SYSTEMS } from './systems'
 import { SystemSchema, PRIVATE_HOSTS } from './schema'
 import { IDENTITY } from './identity'
-import { recordTitle, TITLE_MAX, DESCRIPTION_MAX } from '@/lib/seo'
+import { TITLE_MAX, DESCRIPTION_MAX } from '@/lib/seo'
 import {
   getFeatured,
   getBySlug,
@@ -121,8 +121,14 @@ describe('SYSTEMS content', () => {
  */
 describe('records fit the SERP', () => {
   it('no branded title exceeds the truncation point', () => {
+    // Matches the composition in systems/[slug]/page.tsx: the record's own title, then the
+    // root layout's `%s — ${IDENTITY.name}` template — with the domain suffix dropped, not
+    // truncated mid-word, on the one record that overflows with it (Flourish Together
+    // Therapy — Healthcare · booking, 67 characters against the 60-character budget).
     for (const s of SYSTEMS) {
-      const branded = `${recordTitle(s.name, s.domain)} — ${IDENTITY.name}`
+      const recordTitle = `${s.name} — ${s.domain}`
+      const withDomain = `${recordTitle} — ${IDENTITY.name}`
+      const branded = withDomain.length <= TITLE_MAX ? withDomain : `${s.name} — ${IDENTITY.name}`
       expect(branded.length, `${s.slug}: "${branded}"`).toBeLessThanOrEqual(TITLE_MAX)
     }
   })

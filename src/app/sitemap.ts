@@ -1,25 +1,52 @@
 import type { MetadataRoute } from 'next'
-import { getAllSlugs } from '@/content'
-import { SITE_URL } from '@/content/identity'
+import { SYSTEMS, getFeatured } from '@/content'
+import { canonicalUrl } from '@/lib/seo'
 
-// Required under `output: 'export'` — see the same const in opengraph-image.tsx.
+/**
+ * Required by `output: 'export'`: these metadata files are Route Handlers, and the export
+ * build will not guess whether one is static. Omitting it fails the build rather than
+ * silently shipping a site with no sitemap.
+ */
 export const dynamic = 'force-static'
 
 /**
- * Every indexable URL, derived from the archive rather than listed by hand — a sitemap that
- * has to be edited when a system is added is a sitemap that goes stale on the first one.
+ * Every indexable route, derived from the content rather than listed by hand — adding a
+ * system to `systems.ts` puts it in the sitemap, and there is no way to ship a record that
+ * crawlers never hear about.
  *
- * URLs carry a trailing slash to match `trailingSlash: true` (next.config.ts) and therefore
- * the canonical each page publishes. A sitemap advertising the un-slashed twin of a
- * self-canonicalising page just hands Google two URLs to reconcile.
+ * `/` and `/archive` are the entry points; the 18 records are the substance. Featured
+ * systems get a higher priority than archive-only ones because they are the work he leads
+ * with — priority is a hint about relative importance within one site, not a ranking lever,
+ * so it is only worth setting where the pages genuinely differ.
  *
- * `lastModified` is deliberately absent. The content has no per-record modification date —
- * only a `year` — so anything emitted here would be either the build clock (which changes on
- * every deploy whether or not the page did, training crawlers to ignore the field) or a
- * fabricated date. An honest omission beats a dishonest signal. `changeFrequency` and
- * `priority` are absent for a simpler reason: Google ignores both.
+ * No `lastModified: new Date()`. A build clock would stamp every URL as freshly modified on
+ * every deploy, including records untouched for a year; a sitemap that cries "all new" every
+ * time teaches crawlers to ignore the field. The content carries no edit dates, so the honest
+ * move is to omit it and let `changeFrequency` carry the hint.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = ['/', '/archive/', '/contact/', ...getAllSlugs().map((s) => `/systems/${s}/`)]
-  return routes.map((path) => ({ url: `${SITE_URL}${path}` }))
+  const featured = new Set(getFeatured().map((s) => s.slug))
+
+  return [
+    {
+      url: canonicalUrl('/'),
+      changeFrequency: 'monthly',
+      priority: 1,
+    },
+    {
+      url: canonicalUrl('/archive'),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: canonicalUrl('/contact'),
+      changeFrequency: 'yearly',
+      priority: 0.7,
+    },
+    ...SYSTEMS.map((system) => ({
+      url: canonicalUrl(`/systems/${system.slug}`),
+      changeFrequency: 'yearly' as const,
+      priority: featured.has(system.slug) ? 0.9 : 0.6,
+    })),
+  ]
 }

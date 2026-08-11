@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getBySlug, getAllSlugs, recordNumber, getRelated } from '@/content'
+import { getBySlug, getAllSlugs, recordNumber } from '@/content'
+import { IDENTITY } from '@/content/identity'
 import { HudFrame } from '@/components/hud/HudFrame'
 import { SystemRecord } from '@/components/record/SystemRecord'
-import { pageMetadata, recordTitle } from '@/lib/seo'
-import { recordJsonLd, serializeJsonLd } from '@/lib/jsonLd'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { breadcrumbJsonLd, canonicalUrl, clampDescription, ogImageFor, systemJsonLd, TITLE_MAX } from '@/lib/seo'
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 
@@ -23,16 +24,56 @@ export async function generateMetadata({
   const { slug } = await params
   const system = getBySlug(slug)
   if (!system) return {}
-  // Each record canonicalises to itself. Inheriting the root's canonical would have told
-  // Google all 18 of these were duplicates of the homepage — the single most valuable set
-  // of pages on the site, deindexed by one line in a layout. See src/lib/seo.ts.
-  return pageMetadata({
-    // Both composed rather than taken raw: a title or description that overflows the SERP is
-    // written, indexed, and then not shown. See recordTitle() and SystemSchema.metaDescription.
-    title: recordTitle(system.name, system.domain),
-    description: system.metaDescription ?? system.summary,
-    path: `/systems/${slug}/`,
-  })
+
+  // `metaDescription` (schema.ts) is a hand-trimmed override for a summary that reads well
+  // on the page but overflows a search snippet — see the field note on AIVA in systems.ts.
+  // Only reached for the few records that need it; everything else derives from the summary.
+  /*
+    The summary is written for a reader, not for a result listing, so a long one gets cut at
+    a word boundary rather than mid-word by the search engine. The sector and year are
+    appended when there is room: they are the terms that distinguish this record from the
+    other seventeen in a list of blue links.
+
+    A third of the summaries are written tighter than a search snippet can display (VetWise's
+    is 100 characters against the ~155 Google will show), which wastes the most valuable line
+    of text this page gets. Short ones are extended with the record's own stack — true by
+    construction, since it comes from the same data the page renders, and it adds the
+    technology names someone actually types ("Twilio", "pgvector") rather than filler.
+  */
+  const description =
+    system.metaDescription ??
+    clampDescription(
+      system.summary.length >= 120
+        ? system.summary
+        : `${system.summary} Built with ${system.stack.slice(0, 3).join(', ')}.`,
+    )
+
+  // The domain suffix is dropped, not truncated mid-word, when it would push the branded
+  // title (this, plus the root layout's `— IDENTITY.name` template) past the truncation
+  // point — one record ("Flourish Together Therapy — Healthcare · booking") branded to 67
+  // characters against a 60-character budget. systems.test.ts pins the budget for every
+  // record so the next long name fails the build instead of shipping a cut-off title.
+  const recordTitle = `${system.name} — ${system.domain}`
+  const title = `${recordTitle} — ${IDENTITY.name}`.length <= TITLE_MAX ? recordTitle : system.name
+
+  return {
+    title,
+    description,
+    alternates: { canonical: canonicalUrl(`/systems/${slug}`) },
+    openGraph: {
+      type: 'article',
+      title: recordTitle,
+      description,
+      url: canonicalUrl(`/systems/${slug}`),
+      // Names the project, not the person: a shared record link previously advertised
+      // "Shyamsinh Parmar — AI & Backend Architect" as the description of a card showing
+      // a completely different subject.
+      images: ogImageFor(
+        `/systems/${slug}`,
+        `${system.name} — ${system.domain}, ${system.year}. Built by Shyamsinh Parmar.`,
+      ),
+    },
+  }
 }
 
 export default async function SystemPage({
@@ -50,19 +91,24 @@ export default async function SystemPage({
 
   return (
     <HudFrame>
+      {/* The record as a CreativeWork, credited to the one Person @id the home page defines,
+          plus the trail that lets a result render "Archive › AIVA Chat" instead of a path. */}
+      <JsonLd data={systemJsonLd(system)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Archive Index', path: '/archive' },
+          { name: system.name, path: `/systems/${system.slug}` },
+        ])}
+      />
       <main className="mx-auto max-w-3xl px-6 pt-24 pb-24">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: serializeJsonLd(recordJsonLd(system)) }}
-        />
         {/* animate=false: this addressable route is spec'd "fast, static" (design §8);
             the decode/typewriter belongs to the home scroll, not the one-link detail page. */}
-        {/* headingLevel=1: this route IS the record, so its name is the page's h1. */}
         <SystemRecord
           system={system}
           index={index === -1 ? 0 : index}
           animate={false}
-          headingLevel={1}
+          as="h1"
         />
 
         {system.caseStudy && (
@@ -87,38 +133,6 @@ export default async function SystemPage({
             </div>
           </dl>
         )}
-
-        {/*
-          Related records. Before this, a record page linked to exactly one other page on the
-          site — the index — so 18 of the most specific, most rankable pages here were
-          crawlable dead ends (SEO_RULES.md §12 asks for 5-10 internal links).
-
-          Rows follow /archive's grammar deliberately: catalogue number, name, domain, year.
-          A reader arriving mid-site from a search result should recognise the shape of a
-          record row wherever it appears. Related-ness is derived in getRelated().
-        */}
-        <section className="mt-14 border-t border-[var(--color-border)] pt-8">
-          <h2 className={LABEL}>RELATED RECORDS</h2>
-          <ul className="mt-4">
-            {getRelated(slug).map((r) => (
-              <li key={r.slug}>
-                <Link
-                  href={`/systems/${r.slug}`}
-                  className="grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-x-3 border-b border-[var(--color-border)] py-3 hover:border-[var(--color-ink)] md:grid-cols-[2.5rem_1fr_1fr_auto]"
-                >
-                  <span className={LABEL}>{String(recordNumber(r.slug)).padStart(2, '0')}</span>
-                  <span className="font-mono text-sm tracking-[var(--tracking-hud)] text-[var(--color-ink)]">
-                    {r.name}
-                  </span>
-                  <span className={`${LABEL} hidden md:block`}>{r.domain}</span>
-                  <span className={`${LABEL} text-right`}>
-                    {r.region} · {r.year}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
 
         <Link
           href="/archive"

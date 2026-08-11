@@ -61,7 +61,7 @@ export const IDENTITY = {
    * nothing. Verification status per row is noted below; do not add a row here
    * without opening it. A dead link in the contact section is worse than no link.
    *
-   * `sameAs` marks a row as safe to publish in the JSON-LD Person graph (see lib/jsonLd.ts),
+   * `sameAs` marks a row as safe to publish in the JSON-LD Person graph (see lib/seo.ts),
    * and it is a STRICTER test than "the link works". schema.org sameAs is an assertion that
    * the URL identifies THIS PERSON, and search engines use it to resolve which Shyamsinh the
    * site is about. A wrong entry there does not fail quietly — it actively teaches Google the

@@ -1,7 +1,3 @@
-import type { Metadata } from 'next'
-import { pageMetadata } from '@/lib/seo'
-import { personJsonLd, serializeJsonLd } from '@/lib/jsonLd'
-import { SITE_TITLE, SITE_DESCRIPTION } from './layout'
 import { Constellation } from '@/components/canvas/Constellation'
 import { EntryOverlay } from '@/components/boot/EntryOverlay'
 import { SmoothScroll } from '@/components/scroll/SmoothScroll'
@@ -15,30 +11,17 @@ import { Stack } from '@/components/sections/Stack'
 import { Telemetry } from '@/components/sections/Telemetry'
 import { ArchiveIndex } from '@/components/sections/ArchiveIndex'
 import { Uplink } from '@/components/sections/Uplink'
-
-// Declared here rather than left to the root layout so that the homepage's canonical and
-// og:url are a deliberate choice, not an inheritance every other route has to remember to
-// undo. See src/lib/seo.ts.
-export const metadata: Metadata = pageMetadata({
-  title: SITE_TITLE,
-  description: SITE_DESCRIPTION,
-  path: '/',
-  // SITE_TITLE already ends in the name; without this the layout template would append it twice.
-  titleIsBranded: true,
-})
+import { JsonLd } from '@/components/seo/JsonLd'
+import { personJsonLd, webSiteJsonLd } from '@/lib/seo'
 
 export default function Home() {
   return (
     <>
-      {/*
-        The Person graph. Deliberately outside EntryOverlay: the boot sequence is a client
-        component, and a crawler that never runs it must still see this in the served HTML.
-        Content is our own constants, and serializeJsonLd escapes `<` regardless.
-      */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(personJsonLd()) }}
-      />
+      {/* The entity graph. Person and WebSite are linked by @id rather than repeated, so a
+          crawler reads one identity that owns one site — and every other page's structured
+          data references these same two @ids instead of restating them. */}
+      <JsonLd data={personJsonLd()} />
+      <JsonLd data={webSiteJsonLd()} />
       <Constellation />
       <SmoothScroll />
       <CursorTrail />

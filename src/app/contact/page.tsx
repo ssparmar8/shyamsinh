@@ -2,16 +2,31 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IDENTITY, AVAILABILITY, availabilityLabel } from '@/content/identity'
 import { HudFrame } from '@/components/hud/HudFrame'
-import { pageMetadata } from '@/lib/seo'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { breadcrumbJsonLd, canonicalUrl, clampDescription, contactJsonLd } from '@/lib/seo'
 
-// Deliberately says nothing about availability: AVAILABILITY.open is a one-word edit
-// (identity.ts) and a description baking in "available for contract" would keep claiming it
-// in search results long after he went booked.
-export const metadata: Metadata = pageMetadata({
-  title: 'Uplink',
-  description: `Contact ${IDENTITY.name}, ${IDENTITY.title} — email, phone, and profiles. Contract enquiries for voice agents, LLM pipelines, and backend systems.`,
-  path: '/contact/',
-})
+/**
+ * 'Uplink' is the site's own word for this page and means nothing to someone searching for
+ * an AI developer to hire, so the TITLE carries the site language while the DESCRIPTION
+ * carries the words a person actually types. `Contact ${name}.` was 26 characters and gave a
+ * result listing nothing to read.
+ */
+const DESCRIPTION = clampDescription(
+  `Hire ${IDENTITY.name}, ${IDENTITY.title} — available for freelance and contract work on AI, ` +
+    `voice agent and backend projects. Remote from ${IDENTITY.location}.`,
+)
+
+export const metadata: Metadata = {
+  title: 'Contact',
+  description: DESCRIPTION,
+  alternates: { canonical: canonicalUrl('/contact') },
+  openGraph: {
+    type: 'website',
+    title: `Contact ${IDENTITY.name}`,
+    description: DESCRIPTION,
+    url: canonicalUrl('/contact'),
+  },
+}
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 /** Kept in step with the Uplink beat's ROW — this page and that beat are the same content. */
@@ -21,7 +36,22 @@ const ROW =
 export default function ContactPage() {
   return (
     <HudFrame>
+      <JsonLd data={contactJsonLd()} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Home', path: '/' },
+          { name: 'Contact', path: '/contact' },
+        ])}
+      />
       <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-24">
+        {/* A real <h1>. This page had no heading element at all, so crawlers and screen
+            readers met it as an untitled slab of contact details.
+
+            The heading holds ONLY the words, and the `// UPLINK` wordmark stays a separate
+            element beside it. Nesting the two inside one h1 concatenated their text into
+            "// UPLINKContact Shyamsinh Parmar" — aria-hidden keeps that out of a screen
+            reader, but a crawler reads text content and would have indexed the mangled form. */}
+        <h1 className="sr-only">{`Contact ${IDENTITY.name}`}</h1>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
           <div className={LABEL}>{'// UPLINK'}</div>
           {/* Whether he is taking work is the first thing this page has to answer. */}
@@ -36,27 +66,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/*
-          The page shipped with no heading element at all — not a small one, none. Follows
-          the home hero's shape (Identity.tsx): section label, then the h1 under it.
-
-          The h1 says "CONTACT SHYAMSINH PARMAR" rather than "UPLINK" because a heading is
-          the strongest on-page signal there is, and `// UPLINK` tells a search engine
-          nothing about who this page is for. The HUD label above keeps the site's voice.
-        */}
-        <h1 className="mt-4 font-mono text-2xl tracking-[var(--tracking-wide)] text-[var(--color-ink)] md:text-3xl">
-          CONTACT {IDENTITY.name.toUpperCase()}
-        </h1>
-
-        {/* Prose measure and near-zero tracking, same rule as the hero pitch: tracking-hud is
-            a label setting and stops being readable at sentence length. Says "AI developer"
-            in his own words — the site's title is "AI & Backend Architect", which is the
-            better positioning term and the one nobody types into a search box. */}
-        <p className="mt-5 max-w-xl font-mono text-sm leading-relaxed tracking-[0.02em] text-[var(--color-dim)]">
-          {`AI developer and backend architect based in ${IDENTITY.location}. Contract enquiries for voice agents, LLM pipelines, and the backends that carry them.`}
-        </p>
-
-        <dl className="mt-8 border-t border-[var(--color-border)]">
+        <dl className="mt-6 border-t border-[var(--color-border)]">
           <div className={ROW}>
             <dt className={LABEL}>EMAIL</dt>
             <dd>
