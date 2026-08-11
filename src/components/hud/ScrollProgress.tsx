@@ -47,18 +47,18 @@ export function ScrollProgress() {
     <div
       ref={rootRef}
       aria-hidden="true"
-      className="pointer-events-none fixed top-0 right-0 z-20 hidden h-dvh w-px sm:block"
+      className="pointer-events-none fixed top-0 right-0 z-20 hidden h-dvh w-[2px] sm:block"
     >
       <div className="absolute inset-0 bg-[var(--color-hair)]" />
       <div
         ref={fillRef}
-        className="absolute inset-x-0 top-0 h-full origin-top bg-[var(--color-dim)]"
+        className="absolute inset-x-0 top-0 h-full origin-top bg-[var(--color-ink)] transition-transform duration-75 ease-out"
         style={{ transform: 'scaleY(0)' }}
       />
       <div
         ref={pctRef}
         data-testid="scroll-pct"
-        className="absolute top-1/2 right-2 font-mono text-[9px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]"
+        className="absolute top-1/2 right-3 rounded bg-[var(--color-panel)]/80 px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-[var(--tracking-hud)] text-[var(--color-dim)] shadow-xs backdrop-blur-xs"
       >
         000
       </div>

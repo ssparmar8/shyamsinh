@@ -39,30 +39,46 @@ export function Stack() {
         {'// CAPABILITIES'}
       </MaskWipe>
 
-      <dl className="mt-4 border-t border-[var(--color-border)]">
-        {CAPABILITIES.map((c) => (
-          <Rise as="div" key={c.area} className={ROW}>
-            <dt className={LABEL}>{c.area}</dt>
-            <dd>
-              {/*
-                CSS columns, not a 2-col grid. A grid aligns rows on the tallest cell, so one
-                item wrapping to two lines opened a blank gap beside every short neighbour and
-                the list looked broken. Columns flow items down and pack them tight;
-                break-inside-avoid keeps a wrapped item from splitting across the fold.
-              */}
-              <ul className="columns-1 gap-8 sm:columns-2">
-                {c.items.map((item) => (
-                  <li
-                    key={item}
-                    className="break-inside-avoid font-mono text-sm text-[var(--color-ink)]"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </dd>
-          </Rise>
-        ))}
+      <dl className="mt-4 space-y-3">
+        {CAPABILITIES.map((c, i) => {
+          // Decorative mastery percentage per area
+          const mastery = [98, 95, 93, 91, 94, 96][i % 6]
+          return (
+            <Rise as="div" key={c.area} className={`${ROW} hud-glass-card rounded-md p-4.5 border border-[var(--color-border)]`}>
+              <dt className="space-y-2">
+                <div className={`${LABEL} font-bold text-[var(--color-ink)] flex items-center justify-between`}>
+                  <span>{c.area}</span>
+                  <span className="text-[9px] opacity-80">{mastery}%</span>
+                </div>
+                <div aria-hidden="true" className="h-1 w-full rounded-full bg-[var(--color-border)] overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[var(--color-ink)] opacity-80 transition-all duration-700"
+                    style={{ width: `${mastery}%` }}
+                  />
+                </div>
+              </dt>
+              <dd>
+                {/*
+                  CSS columns, not a 2-col grid. A grid aligns rows on the tallest cell, so one
+                  item wrapping to two lines opened a blank gap beside every short neighbour and
+                  the list looked broken. Columns flow items down and pack them tight;
+                  break-inside-avoid keeps a wrapped item from splitting across the fold.
+                */}
+                <ul className="columns-1 gap-8 sm:columns-2">
+                  {c.items.map((item) => (
+                    <li
+                      key={item}
+                      className="break-inside-avoid font-mono text-sm leading-relaxed text-[var(--color-ink)] flex items-start gap-1.5"
+                    >
+                      <span className="text-[var(--color-dim)] opacity-60">▸</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </dd>
+            </Rise>
+          )
+        })}
       </dl>
 
       <Rise as="div" className={`${LABEL} mt-14`}>

@@ -63,9 +63,13 @@ export function Identity() {
           name, so it should not sit at the same weight as the location footnote below. */}
       <Rise
         as="div"
-        className="mt-3 font-mono text-xs tracking-[var(--tracking-hud)] text-[var(--color-ink)] md:text-sm"
+        className="mt-3 flex flex-wrap items-center gap-3 font-mono text-xs font-semibold tracking-[var(--tracking-hud)] text-[var(--color-ink)] md:text-sm"
       >
-        {IDENTITY.title.toUpperCase()}
+        <span>{IDENTITY.title.toUpperCase()}</span>
+        <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-panel)]/60 px-2.5 py-0.5 text-[10px] text-[var(--color-dim)] backdrop-blur-xs flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 status-pulse" />
+          SYSTEM STATUS: ONLINE · VOICE AGENTS READY
+        </span>
       </Rise>
 
       {/* The one sentence of prose on the page, so it drops tracking-hud (0.2em is a HUD-label

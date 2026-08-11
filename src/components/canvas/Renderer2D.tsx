@@ -123,6 +123,15 @@ export function Renderer2D({ count }: { count: number }) {
       ctx.lineTo(pts[j].x, pts[j].y)
     }
     ctx.stroke()
+
+    // Luminous core vertex nodes on the centerpiece crystal
+    ctx.globalAlpha = WIRE_OPACITY + 0.15
+    ctx.fillStyle = INK
+    for (const p of pts) {
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2)
+      ctx.fill()
+    }
     ctx.globalAlpha = 1
   }, true)
 

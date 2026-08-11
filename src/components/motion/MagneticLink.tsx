@@ -13,10 +13,10 @@ import { magneticOffset } from '@/lib/motion/magnetic'
 import { scrambleFrame } from '@/lib/scramble'
 import { useCursorEnabled } from '@/lib/motion/useCursorEnabled'
 
-const STRENGTH = 0.3 // fraction of the cursor offset the link follows
-const MAX = 6 // px cap on the pull (restrained)
-const EASE = 0.2 // per-frame lerp toward the magnetic target
-const DECODE_MS = 350 // hover-decode duration
+const STRENGTH = 0.35 // fraction of the cursor offset the link follows
+const MAX = 8 // px cap on the pull (restrained)
+const EASE = 0.25 // per-frame lerp toward the magnetic target
+const DECODE_MS = 300 // hover-decode duration
 
 /**
  * A link that eases a few px toward the cursor and (with `text`) briefly scramble-decodes

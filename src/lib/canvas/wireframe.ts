@@ -7,17 +7,17 @@ export type Vec2 = { x: number; y: number }
  * knobs (spec §10 flags them as tune-against-the-running-site).
  */
 export const WIRE_TILT = 0.4 // fixed X tilt so the crystal reads as 3D
-export const WIRE_SPIN = 0.0002 // rad/ms base Y spin ≈ one revolution / ~30s (at rest)
-export const WIRE_SCALE = 0.18 // of min(w, h)
-export const WIRE_OPACITY = 0.28 // slightly above the constellation links so it anchors
+export const WIRE_SPIN = 0.00025 // rad/ms base Y spin ≈ one revolution / ~25s (at rest)
+export const WIRE_SCALE = 0.20 // of min(w, h)
+export const WIRE_OPACITY = 0.35 // slightly above the constellation links so it anchors
 
 // Scroll- and pointer-driven feel, shared so the WebGL and 2D renderers can't drift.
 export const WIRE_SCROLL_TURN = Math.PI * 6 // ~3 turns across the (much taller) pinned page
 export const WIRE_ZOOM = 0.22 // scale gain from top → bottom of the scroll
-export const WIRE_MOUSE_YAW = 0.3 // rad the crystal yaws toward the cursor (x)
-export const WIRE_MOUSE_PITCH = 0.25 // rad it pitches toward the cursor (y)
-export const FIELD_PARALLAX = 14 // px the constellation field shifts against the cursor
-export const POINTER_EASE = 0.06 // per-frame lerp toward the pointer target
+export const WIRE_MOUSE_YAW = 0.35 // rad the crystal yaws toward the cursor (x)
+export const WIRE_MOUSE_PITCH = 0.3 // rad it pitches toward the cursor (y)
+export const FIELD_PARALLAX = 18 // px the constellation field shifts against the cursor
+export const POINTER_EASE = 0.08 // per-frame lerp toward the pointer target
 
 // Scroll-velocity reactions (restrained): extra tilt/zoom proportional to scroll speed,
 // clamped so a flick can't spin the crystal. Renderers ease their local velocity toward
