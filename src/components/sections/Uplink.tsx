@@ -1,11 +1,8 @@
-'use client'
-
-import { useState } from 'react'
 import { IDENTITY, AVAILABILITY, availabilityLabel } from '@/content/identity'
 import { DecodeLine } from '@/components/motion/layers/DecodeLine'
 import { MaskWipe } from '@/components/motion/layers/MaskWipe'
 import { Rise } from '@/components/motion/layers/Rise'
-import { AudioBus } from '@/lib/audio/AudioBus'
+import { CopyEmailButton } from '@/components/sections/CopyEmailButton'
 
 const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--color-dim)]'
 const HEADING = 'font-mono text-xl tracking-[var(--tracking-wide)] text-[var(--color-ink)]'
@@ -13,15 +10,6 @@ const ROW =
   'grid grid-cols-1 gap-1 border-b border-[var(--color-hair)] py-4 md:grid-cols-[5rem_1fr] md:gap-x-4'
 
 export function Uplink() {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopyEmail = () => {
-    void navigator.clipboard.writeText(IDENTITY.email)
-    setCopied(true)
-    if (AudioBus.isEnabled()) AudioBus.play('click')
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   return (
     <section id="uplink" className="py-20 md:py-28">
       {/* The status belongs here most of all: the hero states it, but this is the beat where
@@ -51,13 +39,7 @@ export function Uplink() {
                 {IDENTITY.email}
               </a>
             </MaskWipe>
-            <button
-              type="button"
-              onClick={handleCopyEmail}
-              className="hud-pill-hover cursor-pointer rounded border border-[var(--color-border)] bg-[var(--color-panel)]/80 px-2.5 py-1 font-mono text-[9px] tracking-[var(--tracking-hud)] text-[var(--color-dim)] transition-all"
-            >
-              {copied ? '✓ COPIED' : '⎘ COPY'}
-            </button>
+            <CopyEmailButton email={IDENTITY.email} />
           </dd>
         </div>
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { getFeatured, recordNumber } from '@/content'
+import type { System } from '@/content'
 import { SystemRecord } from '@/components/record/SystemRecord'
 import { DecodeLine } from '@/components/motion/layers/DecodeLine'
 import { Rise } from '@/components/motion/layers/Rise'
@@ -13,16 +13,17 @@ const LABEL = 'font-mono text-[10px] tracking-[var(--tracking-hud)] text-[var(--
 const CATEGORIES = ['ALL', 'VOICE AI', 'LLM & AGENTS', 'PLATFORM & BACKEND'] as const
 type Category = (typeof CATEGORIES)[number]
 
-export function Systems() {
+/** recordIndex is the 0-based archive position — derived server-side (see recordNumber in
+ * '@/content') so this client component never needs a value import from '@/content' itself. */
+export function Systems({ systems }: { systems: (System & { recordIndex: number })[] }) {
   const [activeCategory, setActiveCategory] = useState<Category>('ALL')
-  const featured = getFeatured()
 
   const handleSelectCategory = (cat: Category) => {
     setActiveCategory(cat)
     if (AudioBus.isEnabled()) AudioBus.play('click')
   }
 
-  const filteredSystems = featured.filter((s) => {
+  const filteredSystems = systems.filter((s) => {
     if (activeCategory === 'ALL') return true
     if (activeCategory === 'VOICE AI') return s.domain.toLowerCase().includes('voice') || s.domain.toLowerCase().includes('conversational')
     if (activeCategory === 'LLM & AGENTS') return s.domain.toLowerCase().includes('llm') || s.domain.toLowerCase().includes('ai')
@@ -61,7 +62,7 @@ export function Systems() {
           <Rise key={s.slug}>
             <SystemRecord
               system={s}
-              index={recordNumber(s.slug) - 1}
+              index={s.recordIndex}
               seedBase={i + 1}
               recordHref={`/systems/${s.slug}`}
             />

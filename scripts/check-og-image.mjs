@@ -36,6 +36,11 @@ for (const file of htmlFiles(OUT)) {
   // 404.html is the error document; it is intentionally not a shareable page.
   if (page === '404.html') continue
 
+  // Google's site-verification file is a fixed-content file mandated by Google's own
+  // spec (must contain exactly `google-site-verification: <token>`) — it can never
+  // carry an og:image tag and is not a page anyone shares.
+  if (/^google[a-f0-9]+\.html$/.test(page)) continue
+
   const urls = [
     ...html.matchAll(/<meta property="og:image" content="([^"]*)"/g),
     ...html.matchAll(/<meta name="twitter:image" content="([^"]*)"/g),
