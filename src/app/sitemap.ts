@@ -14,7 +14,7 @@ export const dynamic = 'force-static'
  * system to `systems.ts` puts it in the sitemap, and there is no way to ship a record that
  * crawlers never hear about.
  *
- * `/` and `/archive` are the entry points; the 18 records are the substance. Featured
+ * `/` and `/archive` are the entry points; the 20 records are the substance. Featured
  * systems get a higher priority than archive-only ones because they are the work he leads
  * with — priority is a hint about relative importance within one site, not a ranking lever,
  * so it is only worth setting where the pages genuinely differ.

@@ -47,16 +47,25 @@ export const RELATED_COUNT = 5
  *
  * Sector outweighs any amount of shared tooling, because two healthcare systems are related
  * in the way a reader means even when they share no libraries, while "both use Node.js" says
- * almost nothing — half the archive uses Node.js. Hence sector 3, each shared stack entry 1.
+ * almost nothing — half the archive uses Node.js.
+ *
+ * That rule is now enforced structurally, by comparing sector match BEFORE stack overlap,
+ * rather than by arithmetic. It used to be a single score of `sector ? 3 : 0` plus one per
+ * shared tool, which only implemented the rule while every stack was short enough that no
+ * cross-sector record could reach 4. Enriching the stacks from the portfolio decks broke
+ * exactly that: Goodfin shares React, Node.js, Python and PostgreSQL with OmniAI, scored 4
+ * against same-sector AIVA's 4, and took first place on the year tiebreak — a Fintech record
+ * leading a Conversational AI page. The weight was never the point; the ordering was. A
+ * comparison cannot be outgrown by a longer stack the way a magic number can.
  *
  * The list is always filled to `limit`, topping up with the most recent unrelated records if
  * the scoring runs dry. A page that shows two links because its sector happens to be sparse
  * is the dead-end problem again, just smaller.
  *
- * Ordering is fully deterministic — score, then year, then the canonical archive position —
- * so the same input always produces the same HTML. A tie broken by sort instability would
- * make every build emit a different page and every deploy invalidate pages that did not
- * change.
+ * Ordering is fully deterministic — sector, then shared tooling, then year, then the
+ * canonical archive position — so the same input always produces the same HTML. A tie broken
+ * by sort instability would make every build emit a different page and every deploy
+ * invalidate pages that did not change.
  */
 export const getRelated = (slug: string, limit: number = RELATED_COUNT): System[] => {
   const self = getBySlug(slug)
@@ -65,13 +74,14 @@ export const getRelated = (slug: string, limit: number = RELATED_COUNT): System[
   const others = SYSTEMS.filter((s) => s.slug !== slug)
   const stack = new Set(self.stack)
 
-  const score = (s: System): number =>
-    (s.sector === self.sector ? 3 : 0) + s.stack.filter((t) => stack.has(t)).length
+  const sameSector = (s: System): number => (s.sector === self.sector ? 1 : 0)
+  const overlap = (s: System): number => s.stack.filter((t) => stack.has(t)).length
 
   return [...others]
     .sort(
       (a, b) =>
-        score(b) - score(a) ||
+        sameSector(b) - sameSector(a) ||
+        overlap(b) - overlap(a) ||
         b.year - a.year ||
         SYSTEMS.indexOf(a) - SYSTEMS.indexOf(b),
     )

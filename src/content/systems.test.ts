@@ -58,14 +58,19 @@ describe('SYSTEMS content', () => {
    * rendered next to Shyamsinh's name, and earlier drafts of this project claimed
    * "20 systems across 6 domains and 4 regions" when the truth was 18 / 9 / 3.
    *
+   * Now genuinely 20, as of 2026-08-22: Goodfin and Chroma Data were recovered from the
+   * portfolio decks, where they had been sitting unpublished. The sector count is
+   * unchanged at 9 — Goodfin is Fintech (with Stockly) and Chroma Data is Enterprise
+   * (with ReKnew), so neither opened a new vertical.
+   *
    * `sector` drift is already prevented structurally — it's a zod enum, so a new
    * vertical requires editing the enum on purpose. There is deliberately no
    * "sectors stay coarse" heuristic here; one existed briefly and was removed for
    * asserting something other than what its name claimed.
    */
-  it('has 9 sectors across 18 systems', () => {
+  it('has 9 sectors across 20 systems', () => {
     expect(countSectors()).toBe(9)
-    expect(SYSTEMS).toHaveLength(18)
+    expect(SYSTEMS).toHaveLength(20)
   })
 
   it('counts 3 client regions and 4 map regions including home', () => {
@@ -179,6 +184,29 @@ describe('getRelated', () => {
       const sameSector = SYSTEMS.filter((o) => o.slug !== s.slug && o.sector === s.sector)
       if (sameSector.length === 0) continue
       expect(getRelated(s.slug)[0].sector, s.slug).toBe(s.sector)
+    }
+  })
+
+  /**
+   * The stronger form of the rule above, and the one that actually holds the line.
+   *
+   * Checking only the FIRST slot passed for months while the ordering was a single number —
+   * `sector ? 3 : 0` plus one per shared tool — which quietly stopped implementing "sector
+   * outweighs any amount of shared tooling" the moment a cross-sector record could share
+   * four tools. Enriching the stacks from the portfolio decks did exactly that: Goodfin tied
+   * same-sector AIVA at 4 on OmniAI's page and won the year tiebreak.
+   *
+   * Asserting no cross-sector record precedes a same-sector one anywhere in the list is
+   * independent of how long the stacks get, so it cannot be outgrown the way the number was.
+   */
+  it('never ranks a cross-sector record above a same-sector one', () => {
+    for (const s of SYSTEMS) {
+      const sectors = getRelated(s.slug).map((r) => r.sector === s.sector)
+      const lastSame = sectors.lastIndexOf(true)
+      const firstOther = sectors.indexOf(false)
+      if (lastSame === -1 || firstOther === -1) continue
+      expect(firstOther, `${s.slug}: a different sector precedes a same-sector record`)
+        .toBeGreaterThan(lastSame)
     }
   })
 

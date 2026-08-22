@@ -4,10 +4,13 @@ import { ArchiveIndex } from './ArchiveIndex'
 import { getArchive, getFeatured } from '@/content'
 
 describe('ArchiveIndex', () => {
-  it('renders 12 rows, each linking to its own /systems/[slug]', () => {
+  it('renders 14 rows, each linking to its own /systems/[slug]', () => {
     render(<ArchiveIndex />)
     const archive = getArchive()
-    expect(archive.length).toBe(12)
+    // 14 since 2026-08-22: Goodfin and Chroma Data were recovered from the portfolio
+    // decks. Both land in the archive, not the featured six, so this count moved and the
+    // featured count did not.
+    expect(archive.length).toBe(14)
     for (const system of archive) {
       const link = screen.getByRole('link', { name: new RegExp(system.name) })
       expect(link).toHaveAttribute('href', `/systems/${system.slug}`)

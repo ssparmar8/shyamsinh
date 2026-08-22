@@ -49,7 +49,15 @@ export const SYSTEMS: System[] = [
     engagement: 'Client contract',
     year: 2024,
     role: CONTRACT_ROLE,
-    stack: ['Node.js', 'Twilio', 'Jitsi', 'MySQL', 'AWS'],
+    // Enriched from the Woyce company deck (p5), which carries a fuller stack for this
+    // build than the personal deck did: Angular web + React Native mobile, a microservice
+    // split, and WebSocket transport behind the real-time features.
+    //
+    // MySQL is kept as-is deliberately. The deck says PostgreSQL + DynamoDB + Firestore
+    // instead — that is a CONFLICT, not an addition, and overwriting a datastore claim on
+    // the strength of a marketing PDF is exactly the kind of unverified edit this file
+    // exists to prevent. Resolve with Shyamsinh, then change it here.
+    stack: ['Angular', 'React Native', 'Node.js', 'microservices', 'WebSockets', 'Twilio', 'Jitsi', 'MySQL', 'AWS'],
     summary:
       'A healthcare platform handling patient records, EMR, and billing, with real-time chat and video consultations across separate patient and staff applications.',
     url: 'https://www.healthwealthsafe.com/',
@@ -89,7 +97,10 @@ export const SYSTEMS: System[] = [
     engagement: 'Client contract',
     year: 2025,
     role: CONTRACT_ROLE,
-    stack: ['React', 'Python', 'OpenAI', 'LLM prompt engineering'],
+    // LangChain added from the Woyce deck (p14). Additive only: the two decks disagree on
+    // the backend runtime (personal says Python, Woyce says Node.js), so neither is asserted
+    // over the other — Python stays because it was already here and confirmed.
+    stack: ['React', 'Python', 'LangChain', 'OpenAI', 'LLM prompt engineering'],
     // Rewritten from the LIVE site, which calls itself "The Truth Layer for Enterprise
     // Documents" — structured extraction with source citation. The source deck (and an
     // earlier draft of this file) described automated *drafting* of contracts and
@@ -157,7 +168,8 @@ export const SYSTEMS: System[] = [
     engagement: 'Client contract',
     year: 2024,
     role: CONTRACT_ROLE,
-    stack: ['Node.js', 'OpenAI', 'Twilio'],
+    // Angular + PostgreSQL added from the Woyce deck (p16). Additive; no conflict.
+    stack: ['Angular', 'Node.js', 'PostgreSQL', 'OpenAI', 'Twilio'],
     summary:
       'Secure phone, fax, and text for healthcare practices, with an AI assistant handling scheduling, reminders, refills, and insurance verification.',
     url: 'https://frontdesk.clinic/',
@@ -197,7 +209,11 @@ export const SYSTEMS: System[] = [
     engagement: 'Client contract',
     year: 2025,
     role: CONTRACT_ROLE,
-    stack: ['React', 'Node.js', 'OpenAI'],
+    // The single biggest recovery from the deck review: the Woyce deck (p12) records a
+    // Pinecone vector store, RabbitMQ, and n8n behind this build. The site listed three
+    // tools; the retrieval layer — the part that makes this an AI-architecture record
+    // rather than a CRUD one — was missing entirely.
+    stack: ['React', 'Node.js', 'Python', 'RabbitMQ', 'n8n', 'PostgreSQL', 'Pinecone', 'OpenAI'],
     summary:
       'AI-driven training and hiring — matches candidates to roles, automates job posting, and runs AI-conducted interviews.',
     url: 'https://www.hcomb.ai/',
@@ -213,7 +229,9 @@ export const SYSTEMS: System[] = [
     engagement: 'Client contract',
     year: 2024,
     role: CONTRACT_ROLE,
-    stack: ['Node.js', 'Blockchain', 'PostgreSQL'],
+    // React added from the Woyce deck (p13). PostgreSQL kept: the deck says MongoDB, which
+    // is a conflict to confirm with Shyamsinh rather than an addition to absorb.
+    stack: ['React', 'Node.js', 'Blockchain', 'PostgreSQL'],
     summary:
       'Entity and equity management — secure records for shareholders, directors, and executives, with corporate governance tracking.',
     url: 'https://corprite.co/',
@@ -229,7 +247,8 @@ export const SYSTEMS: System[] = [
     engagement: 'Client contract',
     year: 2024,
     role: CONTRACT_ROLE,
-    stack: ['Node.js', 'React'],
+    // PostgreSQL + OpenAI added from the Woyce deck (p15). Additive; no conflict.
+    stack: ['React', 'Node.js', 'PostgreSQL', 'OpenAI'],
     summary:
       'A Danish consultancy platform covering compliance, anti-corruption, financial management, and ESG advisory.',
     url: 'https://www.krone.one/',
@@ -245,7 +264,8 @@ export const SYSTEMS: System[] = [
     engagement: 'Client contract',
     year: 2024,
     role: CONTRACT_ROLE,
-    stack: ['Node.js', 'PostgreSQL', 'AWS'],
+    // Angular, OpenAI, and Twilio added from the Woyce deck (p17). Additive; no conflict.
+    stack: ['Angular', 'Node.js', 'PostgreSQL', 'OpenAI', 'Twilio', 'AWS'],
     summary:
       'Healthcare revenue-cycle management and EHR — patient data, telehealth consultation, and insurance claims processing.',
     url: 'https://advancedcare.com/',
@@ -261,7 +281,8 @@ export const SYSTEMS: System[] = [
     engagement: 'Client contract',
     year: 2024,
     role: CONTRACT_ROLE,
-    stack: ['Amazon Lex', 'Amazon Connect', 'AWS Lambda'],
+    // API Gateway added from the Woyce deck (p18). Additive; no conflict.
+    stack: ['Amazon Lex', 'Amazon Connect', 'AWS Lambda', 'API Gateway'],
     summary:
       'AI-handled customer queries over a cloud call centre, with custom widget support for voice and chatbot interaction.',
     url: 'https://pcointelligence.com/',
@@ -349,6 +370,76 @@ export const SYSTEMS: System[] = [
     status: 'LIVE',
     featured: false,
   },
+
+  // ---------- ADDED FROM THE PORTFOLIO DECKS (2026-08-22) ----------
+  //
+  // Both were in the source decks and had never made it into this file. They are
+  // APPENDED rather than slotted in by year on purpose: `recordNumber()` is anchored to
+  // declaration order so a record's catalogue number stays stable, and inserting these
+  // mid-array would renumber everything after them.
+  //
+  // A third deck project, the ServiceNow Dashboard, is deliberately still absent. Its
+  // only link is servicenow.com — the vendor's own homepage — and its "stack" describes
+  // ServiceNow's hosting rather than anything built. It reads as claiming a product that
+  // isn't his. A fourth, Woyce's internal AI Call Centre demo, is also left out: it
+  // duplicates AIVA's capability and its host serves a certificate that does not match
+  // its hostname, so the only link available is one that fails closed in every browser.
+  {
+    slug: 'goodfin',
+    name: 'Goodfin',
+    domain: 'Fintech · private markets',
+    sector: 'Fintech',
+    region: 'US',
+    engagement: 'Client contract',
+    // Present in the Woyce deck built 2026-04, so no later than that. ASSUMPTION —
+    // confirm the actual delivery year with Shyamsinh.
+    year: 2026,
+    role: CONTRACT_ROLE,
+    stack: ['React', 'React Native', 'Node.js', 'Python', 'PostgreSQL', 'OpenAI', 'AWS'],
+    // Written from the LIVE site, not the deck — the same rule that governs the YellowPad
+    // and Lalo records, and for the same reason: the deck is wrong here. The personal deck
+    // describes "an AI financial advisor that connects to users' bank/brokerage accounts"
+    // for "budgeting, savings, and investment guidance". The live product is nothing of the
+    // sort — it is pre-IPO private-market investing for accredited investors, via an agentic
+    // platform called GO. A consumer-budgeting caption is disprovable in one click, and it
+    // also sells the work short: private-market portfolio construction is the harder problem.
+    summary:
+      'An agentic AI platform for pre-IPO private-market investing — research, curation, and institutional-grade portfolio construction.',
+    url: 'https://www.goodfin.com/',
+    status: 'LIVE',
+    featured: false,
+  },
+  {
+    slug: 'chroma-data',
+    name: 'Chroma Data',
+    domain: 'Enterprise data agent',
+    sector: 'Enterprise',
+    region: 'US',
+    engagement: 'Client contract',
+    // As with Goodfin: in the 2026-04 deck, exact year unconfirmed.
+    year: 2026,
+    role: CONTRACT_ROLE,
+    stack: [
+      'AWS Bedrock',
+      'Amazon Redshift',
+      'Azure Bot Framework',
+      'Microsoft Teams',
+      'Python',
+      'PostgreSQL',
+      'React',
+    ],
+    // Woyce deck p25. The most senior record in the archive on paper — a tool-calling agent
+    // over a warehouse, delivered inside Teams, spanning two clouds — and it was missing.
+    // The url is the client's own site (chromadata.ai, which chromadata.com now redirects
+    // to); it does not show the assistant, which is internal. That is the same arrangement
+    // as the Krone, ReKnew and AdvancedCare records, so it is consistent — but it is a
+    // client-site link, not a demo of the build.
+    summary:
+      'A Teams-native data assistant for an enterprise AI consultancy — a Bedrock agent that answers analytical questions by querying Redshift through tool calls.',
+    url: 'https://chromadata.ai/',
+    status: 'LIVE',
+    featured: false,
+  },
 ]
 
 /**
@@ -362,7 +453,7 @@ export const SYSTEMS: System[] = [
  * protecting the test suite and nothing else.
  *
  * Every route imports this module, so parsing here fails the build itself. The
- * cost is one parse of 18 records at build time.
+ * cost is one parse of 20 records at build time.
  *
  * Do not "optimise" this away, and do not move it into a test.
  */
