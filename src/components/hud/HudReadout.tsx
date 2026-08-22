@@ -122,15 +122,42 @@ function useVisitorNetwork(): string | null {
  * Decorative and `aria-hidden`: `PID`/`FACILITY` are terminal flavour, never claims.
  * Under reduced motion the clock is stamped once and never ticks.
  */
+import { AudioBus } from '@/lib/audio/AudioBus'
+
 export function HudReadout() {
   const reduced = usePrefersReducedMotion()
   const now = useClock(!reduced)
   const networkLine = useVisitorNetwork()
+  const [audioEnabled, setAudioEnabled] = useState(false)
+
+  const toggleAudio = () => {
+    if (AudioBus.isEnabled()) {
+      AudioBus.disable()
+      setAudioEnabled(false)
+    } else {
+      AudioBus.enable()
+      AudioBus.play('click')
+      setAudioEnabled(true)
+    }
+  }
+
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed bottom-6 left-8 z-20 hidden sm:block">
+    <div aria-hidden="true" className="pointer-events-none fixed bottom-6 left-8 z-20 hidden sm:block rounded-md border border-[var(--color-border)] bg-[var(--color-panel)]/80 px-3.5 py-2.5 backdrop-blur-md shadow-md">
       {networkLine && <div className={LINE}>{networkLine}</div>}
-      <div className={LINE}>FACILITY // ARCHIVE_DAEMON · PID 4182</div>
-      <div className={LINE}>{now}</div>
+      <div className={`${LINE} flex items-center gap-2`}>
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-ink)] opacity-80" />
+        FACILITY // ARCHIVE_DAEMON · PID 4182
+      </div>
+      <div className="flex items-center justify-between gap-4 mt-0.5">
+        <div className={LINE}>{now}</div>
+        <button
+          type="button"
+          onClick={toggleAudio}
+          className="pointer-events-auto cursor-pointer rounded border border-[var(--color-border)] px-1.5 py-0.5 font-mono text-[9px] tracking-[var(--tracking-hud)] text-[var(--color-dim)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)] transition-colors"
+        >
+          SFX: {audioEnabled ? 'ON' : 'OFF'}
+        </button>
+      </div>
     </div>
   )
 }

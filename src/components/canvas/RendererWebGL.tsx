@@ -81,7 +81,7 @@ export function RendererWebGL({ count }: { count: number }) {
     pointsGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(count * 3), 3))
     const points = new THREE.Points(
       pointsGeo,
-      new THREE.PointsMaterial({ color: INK, size: 2.6, transparent: true, opacity: 0.5, sizeAttenuation: false }),
+      new THREE.PointsMaterial({ color: INK, size: 3.0, transparent: true, opacity: 0.6, sizeAttenuation: false }),
     )
 
     const linesGeo = new THREE.BufferGeometry()
@@ -90,7 +90,7 @@ export function RendererWebGL({ count }: { count: number }) {
     linesGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(maxLinks * 6), 3))
     const lines = new THREE.LineSegments(
       linesGeo,
-      new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.14 }),
+      new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.18 }),
     )
 
     const wireGeo = new THREE.BufferGeometry()

@@ -67,7 +67,7 @@ export function TypeOut({
       <span className="sr-only">{text}</span>
       <span aria-hidden="true">
         {done ? text : text.slice(0, count)}
-        {!done && <span className="opacity-60">▍</span>}
+        {!done && <span className="terminal-cursor text-[var(--color-ink)] opacity-80">▍</span>}
       </span>
     </Tag>
   )

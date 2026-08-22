@@ -7,6 +7,7 @@ import { Scene } from '@/components/motion/Scene'
 import { Identity } from '@/components/sections/Identity'
 import { Trajectory } from '@/components/sections/Trajectory'
 import { Systems } from '@/components/sections/Systems'
+import { getFeatured, recordNumber } from '@/content'
 import { Stack } from '@/components/sections/Stack'
 import { Telemetry } from '@/components/sections/Telemetry'
 import { ArchiveIndex } from '@/components/sections/ArchiveIndex'
@@ -15,6 +16,8 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { personJsonLd, webSiteJsonLd } from '@/lib/seo'
 
 export default function Home() {
+  const featuredSystems = getFeatured().map((s) => ({ ...s, recordIndex: recordNumber(s.slug) - 1 }))
+
   return (
     <>
       {/* The entity graph. Person and WebSite are linked by @id rather than repeated, so a
@@ -41,7 +44,7 @@ export default function Home() {
               <Trajectory />
             </Scene>
             <Scene length={0.5}>
-              <Systems />
+              <Systems systems={featuredSystems} />
             </Scene>
             <Scene length={0.4}>
               <Stack />

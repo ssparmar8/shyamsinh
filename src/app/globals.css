@@ -24,28 +24,6 @@
   --tracking-wide: 0.42em;
 }
 
-/*
- * Fonts must use `@theme inline`, and the two rules below are not interchangeable.
- *
- * `next/font` defines --font-geist-* on whichever element carries its generated
- * class (see layout.tsx: <html>). A plain `@theme` would declare --font-mono on
- * :root as `var(--font-geist-mono), …` and resolve it AT :root — where, if the
- * font class sat on <body>, the reference would be invalid at computed-value time,
- * collapse to empty at the root, and inherit down empty. Every `font-mono` element
- * would silently render the system font instead. No error is raised.
- *
- * `inline` makes Tailwind substitute this value straight into the utility
- * (`.font-mono { font-family: var(--font-geist-mono), … }`), so the lookup happens
- * on the element, which inherits the variable normally.
- *
- * The colours above deliberately stay in a non-inline `@theme`, because components
- * reference them directly as `text-[var(--color-dim)]` — that needs the variable to
- * exist at runtime, not be inlined away.
- *
- * This is not theoretical: create-next-app emitted `@theme inline` here, an earlier
- * draft of this file dropped the `inline`, and the entire site rendered in the
- * browser's default sans while every test stayed green.
- */
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
@@ -54,6 +32,50 @@
 body {
   background-color: var(--color-bg);
   color: var(--color-ink);
+  overflow-x: hidden;
+}
+
+/* Glassmorphic & High-Tech HUD Utility Classes with Spring Transitions */
+.hud-glass-card {
+  background: rgba(244, 244, 244, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.04);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 0.3s ease,
+              box-shadow 0.35s ease;
+  will-change: transform, box-shadow;
+}
+
+.hud-glass-card:hover {
+  border-color: rgba(43, 43, 43, 0.45);
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) scale(1.005);
+}
+
+.hud-pill-hover {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, background-color;
+}
+
+.hud-pill-hover:hover {
+  background-color: var(--color-ink);
+  color: var(--color-panel);
+  border-color: var(--color-ink);
+  transform: scale(1.05) translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Terminal Blinking Cursor */
+@keyframes terminal-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.terminal-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: terminal-blink 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Scrollbar themed to match the HUD palette instead of the OS default. */
@@ -89,24 +111,17 @@ body {
 }
 
 /* The hero's availability dot. It breathes rather than blinks — a hard on/off reads as an
- * alert, and nothing here is urgent.
- *
- * The keyframe ENDS opaque on purpose. The reduced-motion rule below collapses every
- * animation to one 0.01ms iteration, which leaves an element parked on its final frame; if
- * this ran 1 → 0.3 the reduced-motion visitor would be handed a dot faded almost out and
- * read it as "offline". Ending at 1 makes that degradation a steady, fully-lit dot. */
+ * alert, and nothing here is urgent. */
 @keyframes status-pulse {
-  from { opacity: 0.3; }
-  to { opacity: 1; }
+  from { opacity: 0.35; transform: scale(0.95); box-shadow: 0 0 0 0 rgba(43, 43, 43, 0.4); }
+  to { opacity: 1; transform: scale(1.05); box-shadow: 0 0 8px 2px rgba(43, 43, 43, 0.25); }
 }
 .status-pulse {
   animation: status-pulse 1.6s ease-in-out infinite alternate both;
 }
 
 /* Record status marker (LIVE / PRIVATE), drawn as a pseudo-element so no extra node lands in
- * the record — see the comment in SystemRecord.tsx for why that matters. Inherits
- * currentColor, so the chip's own text colour decides whether the dot reads as ink or dim.
- * The hollow variant is for a system with nothing public to point at. */
+ * the record — see the comment in SystemRecord.tsx for why that matters. */
 .status-mark::before {
   content: '';
   display: inline-block;
@@ -131,10 +146,7 @@ body {
   }
 }
 
-/* Custom cursor: the native cursor is hidden ONLY while CursorTrail is mounted (it adds
- * .cursor-none to <html>), so touch / reduced-motion / record-route visitors are never
- * affected. Glyph-trail nodes fade out; the fade is opacity-only so it never fights the
- * inline transform that positions each glyph. */
+/* Custom cursor: the native cursor is hidden ONLY while CursorTrail is mounted. */
 .cursor-none, .cursor-none * { cursor: none !important; }
 
 .cursor-glyph {
@@ -145,9 +157,11 @@ body {
   font-size: 10px;
   color: var(--color-ghost);
   pointer-events: none;
-  animation: cursor-glyph-fade 650ms ease-out forwards;
+  animation: cursor-glyph-fade 650ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes cursor-glyph-fade {
-  from { opacity: 0.9; }
-  to { opacity: 0; }
+  0% { opacity: 0.95; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(0.85); }
 }
+

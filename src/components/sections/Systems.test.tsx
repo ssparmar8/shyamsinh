@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { Systems } from './Systems'
-import { getFeatured } from '@/content'
+import { getFeatured, recordNumber } from '@/content'
+
+const featuredSystems = getFeatured().map((s) => ({ ...s, recordIndex: recordNumber(s.slug) - 1 }))
 
 // SystemRecord's names use ScrambleTextAnimated; the Rise wrappers render plain (no Scene
 // context in this isolated render), so no gsap is pulled in. Mock kept minimal for safety.
@@ -25,7 +27,7 @@ beforeEach(() => {
 
 describe('Systems', () => {
   it('renders 6 featured systems as records with distinct names', () => {
-    render(<Systems />)
+    render(<Systems systems={featuredSystems} />)
     const featured = getFeatured()
     expect(featured.length).toBe(6)
     const names = new Set(featured.map((s) => s.name))
@@ -37,7 +39,7 @@ describe('Systems', () => {
   })
 
   it('renders the systems heading (a DecodeLine, plain text outside a Scene)', () => {
-    render(<Systems />)
+    render(<Systems systems={featuredSystems} />)
     // Rendered in isolation there's no SceneContext, so DecodeLine renders one plain heading
     // node — the real text is present and accessible (the scrubbed noise layer only exists
     // inside a scrub Scene, verified in e2e).
